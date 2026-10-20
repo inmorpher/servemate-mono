@@ -4,7 +4,7 @@ import {
   OrderCreate,
   OrderResponseDto,
   OrderUpdateItems,
-} from '../../orders/dto';
+} from '@servemate/shared-dto';
 import { IOrdersRepository } from '../../orders/orders.repository.interface';
 import { OrdersService } from '../../orders/orders.service';
 

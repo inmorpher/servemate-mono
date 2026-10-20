@@ -23,7 +23,7 @@ import {
   searchFoodItemsSchema,
   UpdateFoodItemDTO,
   updateFoodItemSchema,
-} from './dto';
+} from '@servemate/shared-dto';
 import { IFoodItemsService } from './food-items.service.interface';
 
 export type FoodItemsControllerService = Pick<

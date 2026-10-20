@@ -26,7 +26,7 @@ import {
   searchDrinkItemsSchema,
   UpdateDrinkItemDTO,
   updateDrinkItemSchema,
-} from './dto';
+} from '@servemate/shared-dto';
 
 export type DrinkItemsControllerService = Pick<
   IDrinkItemsService,

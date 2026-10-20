@@ -10,7 +10,7 @@ import {
   DrinkMetaDto,
   SearchDrinkItemsDTO,
   UpdateDrinkItemDTO,
-} from './dto';
+} from '@servemate/shared-dto';
 
 const DRINK_SORT_FIELDS = new Set([
   'id',

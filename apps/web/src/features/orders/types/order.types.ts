@@ -1,9 +1,11 @@
-import type { paths } from '@/shared/api/api-types';
+import type {
+	OrderListItemDto,
+	OrderSearchResultDto,
+	OrderState,
+} from '@servemate/shared-dto';
 
-export type Order =
-	paths['/api/orders']['get']['responses']['200']['content']['application/json']['orders'][number];
-export type OrdersResponse =
-	paths['/api/orders']['get']['responses']['200']['content']['application/json'];
-export type OrderStatus = NonNullable<Order['status']>;
+export type Order = OrderListItemDto;
+export type OrdersResponse = OrderSearchResultDto;
+export type OrderStatus = OrderState;
 
-export interface OrderListItem extends Order {}
+export type OrderListItem = Order;

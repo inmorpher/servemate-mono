@@ -3,9 +3,9 @@
 import { refreshSessionAction } from '@/features/auth/api/refresh-sestion';
 import { getSafeInternalPath } from '@/shared/utils/safeInternalPath';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 
-export default function Page() {
+function RefreshContent() {
 	const router = useRouter();
 	const searchParams = useSearchParams();
 	const returnUrl = getSafeInternalPath(searchParams.get('returnUrl'), '/dashboard');
@@ -68,5 +68,13 @@ export default function Page() {
 				{isRefreshing ? 'Повторная попытка...' : 'Повторить'}
 			</button>
 		</div>
+	);
+}
+
+export default function Page() {
+	return (
+		<Suspense fallback={<p aria-live='polite'>Обновление сессии...</p>}>
+			<RefreshContent />
+		</Suspense>
 	);
 }

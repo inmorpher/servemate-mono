@@ -13,20 +13,20 @@ interface PaymentsTableProps {
 	onSortChange: (sortBy: SortField) => void;
 }
 
-const columns = [
+const columns: ReadonlyArray<{ label: string; sortBy?: SortField }> = [
 	{ label: 'ID', sortBy: 'id' },
-	{ label: 'Order', sortBy: 'orderId' },
+	{ label: 'Order' },
 	{ label: 'Status', sortBy: 'status' },
-	{ label: 'Method', sortBy: 'paymentType' },
-	{ label: 'Amount', sortBy: 'amount' },
+	{ label: 'Method' },
+	{ label: 'Amount' },
 	{ label: 'Total', sortBy: 'totalAmount' },
 	{ label: 'Created', sortBy: 'createdAt' },
-] as const satisfies ReadonlyArray<{ label: string; sortBy: SortField }>;
+];
 
 const formatCurrency = (value: number) =>
 	new Intl.NumberFormat('en-US', { style: 'decimal' }).format(value);
 
-const formatDate = (value: string) =>
+const formatDate = (value: string | Date) =>
 	new Intl.DateTimeFormat('ru-RU', {
 		dateStyle: 'medium',
 		timeStyle: 'short',
@@ -53,10 +53,14 @@ export const PaymentsTable = ({
 			<Table.Head>
 				<Table.Row className='bg-ctp-surface1/60 text-ctp-subtext0'>
 					{columns.map((column) => {
-						const isSorted = sortBy === column.sortBy;
+						if (column.sortBy === undefined) {
+							return <Table.HeaderCell key={column.label}>{column.label}</Table.HeaderCell>;
+						}
+						const columnSortBy = column.sortBy;
+						const isSorted = sortBy === columnSortBy;
 						return (
 							<Table.HeaderCell
-								key={column.sortBy}
+								key={column.label}
 								isSortable
 								isSorted={isSorted ? sortOrder : undefined}
 								aria-sort={
@@ -71,7 +75,7 @@ export const PaymentsTable = ({
 									type='button'
 									className='focus-visible:ring-ctp-blue rounded-sm focus-visible:ring-2 focus-visible:outline-none'
 									aria-label={`Sort by ${column.label}`}
-									onClick={() => onSortChange(column.sortBy)}
+									onClick={() => onSortChange(columnSortBy)}
 								>
 									{column.label}
 								</button>

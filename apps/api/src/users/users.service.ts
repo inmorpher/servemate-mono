@@ -20,7 +20,7 @@ import {
   UserMetaDto,
   UserQueryDto,
   UserSortColumn,
-} from './dto';
+} from '@servemate/shared-dto';
 import { IUsersRepository } from './user.repository.interface';
 import { IUsersService } from './users.service.interface';
 

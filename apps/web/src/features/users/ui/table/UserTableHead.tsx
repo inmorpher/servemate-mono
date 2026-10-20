@@ -1,16 +1,16 @@
 import { Button } from '@/shared/components/button';
 import { Table } from '@/shared/components/table';
-import { UserSearchCriteria } from '@servemate/dto';
+import { UserQueryDto } from '@servemate/shared-dto';
 import { USERS_TABLE_COLUMNS } from '../../config/table-config';
 
 interface UserTableHeadProps {
-	sortBy?: UserSearchCriteria['sortBy'];
-	sortOrder?: UserSearchCriteria['sortOrder'];
-	onSortChange: (sortBy: NonNullable<UserSearchCriteria['sortBy']>) => void;
+	sortBy?: UserQueryDto['sortBy'];
+	sortOrder?: UserQueryDto['sortOrder'];
+	onSortChange: (sortBy: NonNullable<UserQueryDto['sortBy']>) => void;
 }
 
 export const UserTableHead = ({ sortBy, sortOrder, onSortChange }: UserTableHeadProps) => {
-	const isActiveColumn = (columnSortBy?: UserSearchCriteria['sortBy']) => sortBy === columnSortBy;
+	const isActiveColumn = (columnSortBy?: UserQueryDto['sortBy']) => sortBy === columnSortBy;
 
 	return (
 		<Table.Head>

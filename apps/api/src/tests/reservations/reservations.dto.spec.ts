@@ -2,7 +2,7 @@ import { ReservationStatus } from '@prisma/client';
 import {
   ReservationCreateSchema,
   ReservationQuerySchema,
-} from '../../reservations/dto';
+} from '@servemate/shared-dto';
 
 describe('Reservation DTOs', () => {
   it('normalizes status and defaults tables', () => {

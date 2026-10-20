@@ -1,4 +1,4 @@
-import { UserSearchCriteria, UserSortColumn } from '@servemate/dto';
+import { UserQueryDto, UserSortColumn } from '@servemate/shared-dto';
 import { Pencil, Trash2 } from 'lucide-react';
 
 export const USERS_TABLE_COLUMNS = [
@@ -10,7 +10,7 @@ export const USERS_TABLE_COLUMNS = [
 	{ label: 'Updated', sortBy: UserSortColumn.UPDATED_AT, width: '17rem' },
 ] as const satisfies ReadonlyArray<{
 	label: string;
-	sortBy?: NonNullable<UserSearchCriteria['sortBy']>;
+	sortBy?: NonNullable<UserQueryDto['sortBy']>;
 	width: string;
 }>;
 

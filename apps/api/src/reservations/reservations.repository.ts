@@ -12,7 +12,7 @@ import {
   ReservationQueryDto,
   ReservationStatus as ReservationStatusDto,
   ReservationUpdateDto,
-} from './dto';
+} from '@servemate/shared-dto';
 import { IReservationsRepository } from './reservations.repository.interface';
 
 const RESERVATION_INCLUDE = {

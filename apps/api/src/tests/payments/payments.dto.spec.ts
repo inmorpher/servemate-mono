@@ -1,4 +1,4 @@
-import { PaymentCreateSchema } from '../../payments/dto';
+import { PaymentCreateSchema } from '@servemate/shared-dto';
 
 describe('Payment DTOs', () => {
   it('defaults item selections to empty arrays', () => {

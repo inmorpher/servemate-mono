@@ -4,7 +4,7 @@ import {
   UpdateUserSchema,
   UserParamsSchema,
   UserQuerySchema,
-} from '../../users/dto';
+} from '@servemate/shared-dto';
 
 describe('Users DTO schemas', () => {
   it('applies query defaults and normalizes role and isActive', () => {

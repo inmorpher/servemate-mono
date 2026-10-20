@@ -9,7 +9,7 @@ import {
   UserLoginDto,
   UserMetaDto,
   UserQueryDto,
-} from './dto';
+} from '@servemate/shared-dto';
 
 export interface IUsersService extends BaseService {
   getMeta(): Promise<UserMetaDto>;

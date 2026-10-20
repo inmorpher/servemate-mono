@@ -4,14 +4,14 @@ import {
 	CreateUserDto,
 	UpdateUserDto,
 	UserListItem,
-	UserListResult,
-	UserSearchCriteria,
-} from '@servemate/dto';
+	UserListResponse,
+	UserQueryDto,
+} from '@servemate/shared-dto';
 
 import { usersEndpoints } from './endpoints';
 
 export type UsersApiClient = {
-	getUsers: (params?: UserSearchCriteria) => Promise<UserListResult>;
+	getUsers: (params?: UserQueryDto) => Promise<UserListResponse>;
 	getUser: (id: string) => Promise<UserListItem>;
 	createUser: (body: CreateUserDto) => Promise<void>;
 	updateUser: (id: string, body: UpdateUserDto) => Promise<void>;
@@ -31,7 +31,7 @@ const requestVoid = async <TBody = unknown>(
 
 export const usersApiClient: UsersApiClient = {
 	getUsers: (params) =>
-		apiRequest<UserListResult>(usersEndpoints.list, {
+		apiRequest<UserListResponse>(usersEndpoints.list, {
 			params,
 			responseMode: 'json',
 		}),

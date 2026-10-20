@@ -1,18 +1,18 @@
 'use client';
 
-import { UserListItem, UserListResult, UserSearchCriteria } from '@servemate/dto';
+import { UserListItem, UserListResponse, UserQueryDto } from '@servemate/shared-dto';
 import { useState } from 'react';
 import { DeleteUserDialog } from '../DeleteUserDialog';
 import { UsersTable } from './UserTable';
 
-export type UsersListItem = UserListResult['users'][number];
+export type UsersListItem = UserListResponse['users'][number];
 
 export interface UsersListProps {
 	isLoading?: boolean;
 	users: UsersListItem[] | undefined;
-	sortBy?: UserSearchCriteria['sortBy'];
-	sortOrder?: UserSearchCriteria['sortOrder'];
-	onSortChange: (sortBy: NonNullable<UserSearchCriteria['sortBy']>) => void;
+	sortBy?: UserQueryDto['sortBy'];
+	sortOrder?: UserQueryDto['sortOrder'];
+	onSortChange: (sortBy: NonNullable<UserQueryDto['sortBy']>) => void;
 	onEditUser?: (user: UserListItem) => void;
 }
 

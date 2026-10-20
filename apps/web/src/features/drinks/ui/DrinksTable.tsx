@@ -13,17 +13,17 @@ interface DrinksTableProps {
 	onSortChange: (sortBy: SortField) => void;
 }
 
-const columns = [
+const columns: ReadonlyArray<{ label: string; sortBy?: SortField }> = [
 	{ label: 'ID', sortBy: 'id' },
 	{ label: 'Name', sortBy: 'name' },
 	{ label: 'Category', sortBy: 'category' },
 	{ label: 'Price', sortBy: 'price' },
 	{ label: 'Volume', sortBy: 'volume' },
-	{ label: 'Alcohol', sortBy: 'alcoholPercentage' },
-	{ label: 'Temperature', sortBy: 'tempriture' },
+	{ label: 'Alcohol' },
+	{ label: 'Temperature' },
 	{ label: 'Availability', sortBy: 'isAvailable' },
-	{ label: 'Ingredients', sortBy: 'ingredients' },
-] as const satisfies ReadonlyArray<{ label: string; sortBy: SortField }>;
+	{ label: 'Ingredients' },
+];
 
 export const DrinksTable = ({
 	drinks,
@@ -48,10 +48,14 @@ export const DrinksTable = ({
 			<Table.Head>
 				<Table.Row className='bg-ctp-surface1/60 text-ctp-subtext0'>
 					{columns.map((column) => {
-						const isSorted = sortBy === column.sortBy;
+						if (column.sortBy === undefined) {
+							return <Table.HeaderCell key={column.label}>{column.label}</Table.HeaderCell>;
+						}
+						const columnSortBy = column.sortBy;
+						const isSorted = sortBy === columnSortBy;
 						return (
 							<Table.HeaderCell
-								key={column.sortBy}
+								key={column.label}
 								isSortable
 								isSorted={isSorted ? sortOrder : undefined}
 								aria-sort={
@@ -66,7 +70,7 @@ export const DrinksTable = ({
 									type='button'
 									className='focus-visible:ring-ctp-blue min-h-10 rounded-sm focus-visible:ring-2 focus-visible:outline-none'
 									aria-label={`Sort by ${column.label}`}
-									onClick={() => onSortChange(column.sortBy)}
+									onClick={() => onSortChange(columnSortBy)}
 								>
 									{column.label}
 								</button>

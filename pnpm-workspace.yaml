@@ -1,0 +1,19 @@
+packages:
+  - 'packages/*'
+  - 'apps/*'
+
+allowBuilds:
+  '@parcel/watcher': true
+  '@prisma/engines': true
+  '@swc/core': true
+  bcrypt: true
+  esbuild: false
+  msw: true
+  prisma: true
+  protobufjs: true
+  sharp: true
+  unrs-resolver: true
+
+overrides:
+  '@types/react': 19.3.0
+  '@types/react-dom': 19.3.0

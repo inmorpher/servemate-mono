@@ -1,11 +1,11 @@
 'use client';
 
 import { useMutation } from '@tanstack/react-query';
-import { OrderCreateDTO } from '@servemate/dto';
+import { OrderCreate } from '@servemate/shared-dto';
 import { orderApiClient } from '../api';
 
 export const useCreateOrder = () => {
 	return useMutation({
-		mutationFn: (body: OrderCreateDTO) => orderApiClient.createOrder(body),
+		mutationFn: (body: OrderCreate) => orderApiClient.createOrder(body),
 	});
 };

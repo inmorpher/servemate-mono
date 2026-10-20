@@ -1,6 +1,6 @@
-import { WorkspaceSettings } from './dto/workspace-settings.dto';
-import { WorkspaceTab } from './dto/workspace-tab.dto';
-import { Workspace } from './dto/workspace.dto';
+import { WorkspaceSettings } from '@servemate/shared-dto';
+import { WorkspaceTab } from '@servemate/shared-dto';
+import { Workspace } from '@servemate/shared-dto';
 
 export type WorkspaceUpdateData = {
   tabs: WorkspaceTab[];

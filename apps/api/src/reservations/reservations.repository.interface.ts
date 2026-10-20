@@ -7,7 +7,7 @@ import {
   ReservationQueryDto,
   ReservationStatus,
   ReservationUpdateDto,
-} from './dto';
+} from '@servemate/shared-dto';
 
 export interface IReservationsRepository {
   getMeta(): Promise<ReservationMetaDto>;

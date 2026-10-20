@@ -9,7 +9,7 @@ import {
   FoodMetaDto,
   SearchFoodItemsDTO,
   UpdateFoodItemDTO,
-} from './dto';
+} from '@servemate/shared-dto';
 import { IFoodItemsRepository } from './food-items.repository.interface';
 
 const FOOD_SORT_FIELDS = new Set([

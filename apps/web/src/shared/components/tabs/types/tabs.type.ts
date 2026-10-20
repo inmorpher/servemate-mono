@@ -52,7 +52,7 @@ export type WorkspaceTabState = {
 
 export type WorkspaceTabsInput = {
 	tabs: WorkspaceTabState[];
-	activeTabId?: string;
+	activeTabId?: string | null;
 };
 
 export type TabsState = {

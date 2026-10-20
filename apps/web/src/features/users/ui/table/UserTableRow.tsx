@@ -1,17 +1,17 @@
 import { ActionMenu } from '@/shared/components/action-menu/ActionMenu';
 import { Table } from '@/shared/components/table';
-import { UserListItem, UserSearchCriteria, UserSortColumn } from '@servemate/dto';
+import { UserListItem, UserQueryDto, UserSortColumn } from '@servemate/shared-dto';
 import { Trash2 } from 'lucide-react';
 import { formatDate, getRoleColor } from '../../utils/userHelpers';
 
 interface UserTableRowProps {
 	user: UserListItem;
-	sortBy?: UserSearchCriteria['sortBy'];
+	sortBy?: UserQueryDto['sortBy'];
 	onDelete: (userId: number) => void;
 }
 
 export const UserTableRow = ({ user, sortBy, onDelete }: UserTableRowProps) => {
-	const isActiveColumn = (columnSortBy?: UserSearchCriteria['sortBy']) => sortBy === columnSortBy;
+	const isActiveColumn = (columnSortBy?: UserQueryDto['sortBy']) => sortBy === columnSortBy;
 
 	return (
 		<Table.Row key={user.id}>

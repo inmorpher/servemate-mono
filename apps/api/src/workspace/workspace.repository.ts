@@ -2,7 +2,7 @@ import { Prisma, PrismaClient } from '@prisma/client';
 import { inject, injectable } from 'inversify';
 import 'reflect-metadata';
 import { TYPES } from '../types';
-import { Workspace, WorkspaceSchema } from './dto/workspace.dto';
+import { Workspace, WorkspaceSchema } from '@servemate/shared-dto';
 import {
   IWorkspaceRepository,
   WorkspaceUpdateData,

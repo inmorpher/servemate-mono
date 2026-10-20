@@ -1,6 +1,6 @@
 import { Card } from '@/features/card';
 import { orderSearchOptions } from '@/features/search/model/ordersOptions';
-import { OrderSearchListResult } from '@servemate/dto';
+import { OrderSearchResultDto } from '@servemate/shared-dto';
 import { memo, ViewTransition } from 'react';
 import {
 	formatCurrency,
@@ -9,7 +9,7 @@ import {
 	getStatusIndicatorColor,
 } from '../utils/orderHelpers';
 
-type OrderListItem = OrderSearchListResult['orders'][number];
+type OrderListItem = OrderSearchResultDto['orders'][number];
 
 /**
  * Compact order card for list/grid view with essential information only.

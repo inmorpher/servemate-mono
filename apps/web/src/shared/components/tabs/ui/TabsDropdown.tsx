@@ -1,5 +1,4 @@
 'use client';
-import { paths } from '@/shared/api/api-types';
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/components/popover';
 import { useState } from 'react';
 import { useTabs } from '../store/useTabs';
@@ -18,8 +17,6 @@ export const TabsDropdown = ({ isMobile = false }: TabsDropdownProps) => {
 		setActiveTab(tabId);
 		setIsOpen(false); // ← Закрыть popover после выбора
 	};
-	const test =
-		{} as paths['/api/auth/me']['get']['responses']['200']['content']['application/json'];
 	const isMobileClasses = isMobile ? 'lg:hidden' : '';
 	return (
 		<Popover open={isOpen} onOpenChange={setIsOpen}>

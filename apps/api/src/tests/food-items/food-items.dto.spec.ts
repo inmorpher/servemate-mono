@@ -1,7 +1,7 @@
 import {
   createFoodItemSchema,
   searchFoodItemsSchema,
-} from '../../food-items/dto';
+} from '@servemate/shared-dto';
 
 describe('Food item DTOs', () => {
   it('applies create and query defaults', () => {

@@ -27,7 +27,7 @@ import {
   TableQuerySchema,
   TableUpdateDto,
   TableUpdateSchema,
-} from './dto';
+} from '@servemate/shared-dto';
 import { ITablesService } from './tables.service.interface';
 
 export type TablesControllerService = Pick<

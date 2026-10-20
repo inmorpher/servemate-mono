@@ -1,14 +1,12 @@
-import type { paths } from '@/shared/api/api-types';
+import type {
+	PaymentDTO,
+	PaymentListDTO,
+	PaymentMetaDto,
+	PaymentSearchCriteria as PaymentSearchQuery,
+} from '@servemate/shared-dto';
 
-export type PaymentSearchCriteria = Omit<
-	Partial<paths['/api/payments']['get']['parameters']['query']>,
-	'sortOrder'
-> & {
-	sortOrder?: 'asc' | 'desc';
-};
+export type PaymentSearchCriteria = Partial<PaymentSearchQuery>;
 
-export type PaymentListResult =
-	paths['/api/payments']['get']['responses'][200]['content']['application/json'];
-export type PaymentListItem = PaymentListResult['payments'][number];
-export type PaymentsMeta =
-	paths['/api/payments/meta']['get']['responses'][200]['content']['application/json'];
+export type PaymentListResult = PaymentListDTO;
+export type PaymentListItem = PaymentDTO;
+export type PaymentsMeta = PaymentMetaDto;

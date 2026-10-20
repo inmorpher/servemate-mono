@@ -1,4 +1,4 @@
-import { UserRole } from '@servemate/dto';
+import { UserRole } from '@servemate/shared-dto';
 
 const getRoleColor = (role: UserRole, variant: 'text' | 'bg') => {
 	switch (role) {

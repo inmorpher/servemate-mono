@@ -3,6 +3,8 @@
 import { useTabs, useTabsStoreApi } from '@/shared/components/tabs/store/useTabs';
 import type { Tab } from '@/shared/components/tabs/types/tabs.type';
 import { useEffect, useRef, useState } from 'react';
+import { parseEnumValue } from '@/shared/utils/parseEnumValue';
+import { FoodCategory, FoodType } from '@servemate/shared-dto';
 import type { FoodSearchCriteria } from '../types';
 
 type TextFilterKey = 'name';
@@ -83,11 +85,11 @@ export const useFoodFilters = (tabId: Tab['id']) => {
 	};
 
 	const handleCategoryChange = (value: string) => {
-		updateFilters({ category: value || undefined });
+		updateFilters({ category: parseEnumValue(FoodCategory, value) });
 	};
 
 	const handleTypeChange = (value: string) => {
-		updateFilters({ type: value || undefined });
+		updateFilters({ type: parseEnumValue(FoodType, value) });
 	};
 
 	const handleAvailabilityChange = (value: string) => {

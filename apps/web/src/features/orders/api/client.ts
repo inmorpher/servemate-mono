@@ -1,20 +1,20 @@
 import { apiRequest } from '@/shared/utils/apiRequest';
 import {
-	OrderCreateDTO,
-	OrderMetaDTO,
-	OrderSearchCriteria,
-	OrderSearchListResult,
+	OrderCreate,
+	OrderMetaDto,
+	OrderQuery,
+	OrderSearchResultDto,
 	OrderUpdateItems,
-	OrderUpdateProps,
-} from '@servemate/dto';
+	OrderUpdate,
+} from '@servemate/shared-dto';
 import { orderEndpoints } from './endpoints';
 
 export type OrderApiClient = {
-	getOrders: (params?: OrderSearchCriteria) => Promise<OrderSearchListResult>;
-	getMeta: (params?: OrderSearchCriteria) => Promise<OrderMetaDTO>;
-	createOrder: (body: OrderCreateDTO) => Promise<void>;
+	getOrders: (params?: OrderQuery) => Promise<OrderSearchResultDto>;
+	getMeta: (params?: OrderQuery) => Promise<OrderMetaDto>;
+	createOrder: (body: OrderCreate) => Promise<void>;
 	updateOrderItems: (id: string, body: OrderUpdateItems) => Promise<void>;
-	updateOrderProperties: (id: string, body: OrderUpdateProps) => Promise<void>;
+	updateOrderProperties: (id: string, body: OrderUpdate) => Promise<void>;
 	printOrderItems: (id: string) => Promise<void>;
 	callOrderItems: (id: string) => Promise<void>;
 	deleteOrder: (id: string) => Promise<void>;
@@ -33,17 +33,17 @@ const requestVoid = async <TBody>(
 
 export const orderApiClient: OrderApiClient = {
 	getOrders: (params) =>
-		apiRequest<OrderSearchListResult>(orderEndpoints.list, {
+		apiRequest<OrderSearchResultDto>(orderEndpoints.list, {
 			params,
 			responseMode: 'json',
 		}),
 	getMeta: (params) =>
-		apiRequest<OrderMetaDTO>(orderEndpoints.meta, {
+		apiRequest<OrderMetaDto>(orderEndpoints.meta, {
 			params,
 			responseMode: 'json',
 		}),
 	createOrder: async (body) => {
-		await requestVoid<OrderCreateDTO>(orderEndpoints.create, {
+		await requestVoid<OrderCreate>(orderEndpoints.create, {
 			method: 'POST',
 			body,
 		});
@@ -55,7 +55,7 @@ export const orderApiClient: OrderApiClient = {
 		});
 	},
 	updateOrderProperties: async (id, body) => {
-		await requestVoid<OrderUpdateProps>(orderEndpoints.update(id), {
+		await requestVoid<OrderUpdate>(orderEndpoints.update(id), {
 			method: 'PATCH',
 			body,
 		});

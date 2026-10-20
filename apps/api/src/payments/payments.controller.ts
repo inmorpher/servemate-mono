@@ -19,7 +19,7 @@ import {
   PaymentSearchSchema,
   RefundDTO,
   RefundSchema,
-} from './dto';
+} from '@servemate/shared-dto';
 import { IPaymentsService } from './payments.service.interface';
 
 export type PaymentsControllerService = Pick<

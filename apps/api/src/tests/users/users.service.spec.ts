@@ -5,7 +5,7 @@ import {
   UserListItem,
   UserQueryDto,
   UserSortColumn,
-} from '../../users/dto';
+} from '@servemate/shared-dto';
 import { IUsersRepository } from '../../users/user.repository.interface';
 import { UserService } from '../../users/users.service';
 

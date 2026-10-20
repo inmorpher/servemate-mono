@@ -1,12 +1,12 @@
 'use client';
 
 import { useApiQuery } from '@/shared/hooks/useApiQuery';
-import { OrderSearchCriteria, OrderSearchListResult } from '@servemate/dto';
+import { OrderQuery, OrderSearchResultDto } from '@servemate/shared-dto';
 import { orderEndpoints } from '../api';
 import { useGetOrdersMeta } from './useGetOrdersMeta';
 
-export const useGetOrdersAndMeta = (orderSearchCriteria: Partial<OrderSearchCriteria> = {}) => {
-	const ordersQuery = useApiQuery<OrderSearchListResult>(
+export const useGetOrdersAndMeta = (orderSearchCriteria: Partial<OrderQuery> = {}) => {
+	const ordersQuery = useApiQuery<OrderSearchResultDto>(
 		orderEndpoints.list,
 		orderSearchCriteria,
 		{

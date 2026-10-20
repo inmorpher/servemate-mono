@@ -8,9 +8,9 @@ import { Controller, Get, Post } from '../decorators/httpDecorators';
 import { ILogger } from '../logger/logger.service.interface';
 import { Validate } from '../middleware/validate/validate.middleware';
 import { TYPES } from '../types';
-import { UserLoginDto, UserLoginSchema } from '../users/dto';
+import { UserLoginDto, UserLoginSchema } from '@servemate/shared-dto';
 import { IAuthService } from './auth.service.interface';
-import { RefreshTokenRequest } from './dto/auth.dto';
+import { RefreshTokenRequest } from '@servemate/shared-dto';
 
 const REFRESH_COOKIE_OPTIONS = {
   httpOnly: true,

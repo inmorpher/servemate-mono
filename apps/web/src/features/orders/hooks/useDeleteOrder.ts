@@ -1,6 +1,6 @@
 'use client';
 
-import { OrderSearchListResult } from '@servemate/dto';
+import { OrderSearchResultDto } from '@servemate/shared-dto';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { orderApiClient } from '../api';
 
@@ -11,11 +11,11 @@ export const useDeleteOrder = () => {
 		onMutate: async ({ id }: { id: string }) => {
 			await queryClient.cancelQueries({ queryKey: ['orders'] });
 
-			const previousOrdersQueries = queryClient.getQueriesData<OrderSearchListResult>({
+			const previousOrdersQueries = queryClient.getQueriesData<OrderSearchResultDto>({
 				queryKey: ['orders'],
 			});
 
-			queryClient.setQueriesData<OrderSearchListResult>(
+			queryClient.setQueriesData<OrderSearchResultDto>(
 				{ queryKey: ['orders'] },
 				(currentData) => {
 					if (!currentData?.orders) {

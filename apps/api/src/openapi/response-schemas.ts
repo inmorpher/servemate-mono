@@ -2,31 +2,25 @@ import { z } from 'zod';
 import {
   drinkItemSchema,
   drinkItemsListSchema,
-} from '../drink-items/dto/drink-base.dto';
-import { DrinkMetaSchema } from '../drink-items/dto/drink-meta.dto';
-import {
+  DrinkMetaSchema,
   foodItemSchema,
   foodItemsListSchema,
-} from '../food-items/dto/food-base.dto';
-import { FoodMetaSchema } from '../food-items/dto/food-meta.dto';
-import { OrderMetaSchema } from '../orders/dto/order-meta.dto';
-import {
+  FoodMetaSchema,
+  OrderMetaSchema,
   OrderResponseSchema,
   OrderSearchResultSchema,
-} from '../orders/dto/order-response.dto';
-import { PaymentSchema } from '../payments/dto/payment-base.dto';
-import { PaymentMetaSchema } from '../payments/dto/payment-meta.dto';
-import {
+  PaymentSchema,
+  PaymentMetaSchema,
   ReservationSchema,
   ReservationTableSchema,
-} from '../reservations/dto/reservation-base.dto';
-import { ReservationMetaSchema } from '../reservations/dto/reservation-meta.dto';
-import { TableSchema } from '../tables/dto/table-base.dto';
-import { TableMetaSchema } from '../tables/dto/table-meta.dto';
-import { UserResponseSchema } from '../users/dto/user-base.dto';
-import { UserMetaSchema } from '../users/dto/user-meta.dto';
-import { WorkspaceTabSchema } from '../workspace/dto/workspace-tab.dto';
-import { WorkspaceSchema } from '../workspace/dto/workspace.dto';
+  ReservationMetaSchema,
+  TableSchema,
+  TableMetaSchema,
+  UserResponseSchema,
+  UserMetaSchema,
+  WorkspaceTabSchema,
+  WorkspaceSchema,
+} from '@servemate/shared-dto';
 
 export const ErrorResponseSchema = z.object({
   statusCode: z.number().int(),

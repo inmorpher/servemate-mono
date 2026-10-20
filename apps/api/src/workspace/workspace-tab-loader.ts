@@ -1,22 +1,22 @@
 import { inject, injectable } from 'inversify';
 
 import { IDrinkItemsService } from '../drink-items/drink-items.service.interface';
-import { searchDrinkItemsSchema } from '../drink-items/dto/drink-query.dto';
+import { searchDrinkItemsSchema } from '@servemate/shared-dto';
 import { HTTPError } from '../errors/http-error.class';
-import { searchFoodItemsSchema } from '../food-items/dto/food-query.dto';
+import { searchFoodItemsSchema } from '@servemate/shared-dto';
 import { IFoodItemsService } from '../food-items/food-items.service.interface';
-import { OrderQuerySchema } from '../orders/dto/order-query.dto';
+import { OrderQuerySchema } from '@servemate/shared-dto';
 import { IOrdersService } from '../orders/orders.service.interface';
-import { PaymentSearchSchema } from '../payments/dto/payment-base.dto';
+import { PaymentSearchSchema } from '@servemate/shared-dto';
 import { IPaymentsService } from '../payments/payments.service.interface';
-import { ReservationQuerySchema } from '../reservations/dto/reservation-query.dto';
+import { ReservationQuerySchema } from '@servemate/shared-dto';
 import { IReservationsService } from '../reservations/reservations.service.interface';
-import { TableQuerySchema } from '../tables/dto/table-query.dto';
+import { TableQuerySchema } from '@servemate/shared-dto';
 import { ITablesService } from '../tables/tables.service.interface';
 import { TYPES } from '../types';
-import { UserQuerySchema } from '../users/dto/user-query.dto';
+import { UserQuerySchema } from '@servemate/shared-dto';
 import { IUsersService } from '../users/users.service.interface';
-import { WorkspaceTab } from './dto/workspace-tab.dto';
+import { WorkspaceTab } from '@servemate/shared-dto';
 
 @injectable()
 export class WorkspaceTabLoader {

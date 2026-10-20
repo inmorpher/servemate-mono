@@ -2,6 +2,8 @@
 
 import { useTabs, useTabsStoreApi } from '@/shared/components/tabs/store/useTabs';
 import type { Tab } from '@/shared/components/tabs/types/tabs.type';
+import { parseEnumValue } from '@/shared/utils/parseEnumValue';
+import { TableCondition } from '@servemate/shared-dto';
 import type { TableSearchCriteria } from '../types';
 
 export const useTableFilters = (tabId: Tab['id']) => {
@@ -28,7 +30,7 @@ export const useTableFilters = (tabId: Tab['id']) => {
 	};
 
 	const handleStatusChange = (value: string) => {
-		updateFilters({ status: value || undefined });
+		updateFilters({ status: parseEnumValue(TableCondition, value) });
 	};
 
 	const handleOccupiedChange = (value: string) => {

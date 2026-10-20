@@ -4,12 +4,12 @@ import { v4 as uidv4 } from 'uuid';
 import { BaseService } from '../common/base.service';
 import { ILogger } from '../logger/logger.service.interface';
 import { TYPES } from '../types';
-import { AuthenticatedUser, UserLoginDto } from '../users/dto';
+import { AuthenticatedUser, UserLoginDto } from '@servemate/shared-dto';
 import { IUsersService } from '../users/users.service.interface';
 import { IAuthRepository } from './auth.repository.interface';
 import { IAuthService } from './auth.service.interface';
-import type { TokenPair } from './dto/auth.dto';
-import { LoginResult, SessionMetadata } from './dto/auth.dto';
+import type { TokenPair } from '@servemate/shared-dto';
+import { LoginResult, SessionMetadata } from '@servemate/shared-dto';
 import { ITokenService } from './token.service.interface';
 
 import { HTTPError } from '../errors/http-error.class';

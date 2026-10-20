@@ -5,7 +5,7 @@ import { IPaymentsService } from '../../payments/payments.service.interface';
 import { IReservationsService } from '../../reservations/reservations.service.interface';
 import { ITablesService } from '../../tables/tables.service.interface';
 import { IUsersService } from '../../users/users.service.interface';
-import { WorkspaceTab } from '../../workspace/dto/workspace-tab.dto';
+import { WorkspaceTab } from '@servemate/shared-dto';
 import { WorkspaceTabLoader } from '../../workspace/workspace-tab-loader';
 
 const services = () => ({

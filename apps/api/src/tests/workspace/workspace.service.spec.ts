@@ -1,9 +1,9 @@
 import { HTTPError } from '../../errors/http-error.class';
 import { IWebSocketService } from '../../websocket/websocket.service.interface';
-import { UpdateWorkspaceDto } from '../../workspace/dto/update-workspace.dto';
-import { WorkspaceBootstrapDto } from '../../workspace/dto/workspace-bootstrap.dto';
-import { WorkspaceTab } from '../../workspace/dto/workspace-tab.dto';
-import { Workspace } from '../../workspace/dto/workspace.dto';
+import { UpdateWorkspaceDto } from '@servemate/shared-dto';
+import { WorkspaceBootstrapDto } from '@servemate/shared-dto';
+import { WorkspaceTab } from '@servemate/shared-dto';
+import { Workspace } from '@servemate/shared-dto';
 import { WorkspaceTabLoader } from '../../workspace/workspace-tab-loader';
 import { IWorkspaceRepository } from '../../workspace/workspace.repository.interface';
 import { WorkspaceService } from '../../workspace/workspace.service';

@@ -9,7 +9,7 @@ import {
   TableMetaDto,
   TableQueryDto,
   TableUpdateDto,
-} from './dto';
+} from '@servemate/shared-dto';
 import {
   ITablesRepository,
   TablePagination,
@@ -144,7 +144,7 @@ export class TablesRepository implements ITablesRepository {
     serverId,
     assignedTables,
     isPrimary,
-  }: import('./dto').TableAssignmentDto): Promise<void> {
+  }: import('@servemate/shared-dto').TableAssignmentDto): Promise<void> {
     await this.prisma.$transaction(async prisma => {
       const server = await prisma.user.findUnique({
         where: { id: serverId },

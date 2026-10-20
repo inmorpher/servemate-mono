@@ -1,13 +1,14 @@
 services:
   app:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ../..
+      dockerfile: apps/api/Dockerfile
     container_name: servemate-service
     ports:
       - "3000:3000"
     environment:
       - NODE_ENV=production
+      - PORT=3000
       - DATABASE_URL=${DATABASE_URL}
     restart: always
     networks:
@@ -15,8 +16,8 @@ services:
 
   mcp:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ../..
+      dockerfile: apps/api/Dockerfile
     container_name: servemate-mcp
     command: ["npm", "run", "mcp:prod"]
     stdin_open: true

@@ -5,15 +5,11 @@ import { startTransition } from 'react';
 import { HoverCardComponent } from '../../hover-card';
 import { useTabs } from '../store/useTabs';
 import { TabButton } from './TabButton';
-import { components } from '@/shared/api/api-types';
 
 type TabsHorizontalProps = {
 	isMobile?: boolean;
 };
 
-
-type CreateUserBody = components['schemas']['CreateUserSchema'];
-type UserResponse = components['schemas']['UserResponseSchema'];
 export const TabsHorizontal = ({ isMobile = false }: TabsHorizontalProps) => {
 	const { tabs, activeTabId, setActiveTab, removeTab } = useTabs();
 

@@ -6,7 +6,7 @@ import {
   UserMetaDto,
   UserRole,
   UserSortColumn,
-} from './dto';
+} from '@servemate/shared-dto';
 
 export type UserPagination = {
   page: number;

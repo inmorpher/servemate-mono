@@ -5,7 +5,7 @@ import {
   FoodMetaDto,
   SearchFoodItemsDTO,
   UpdateFoodItemDTO,
-} from './dto';
+} from '@servemate/shared-dto';
 
 export interface IFoodItemsService {
   getMeta(): Promise<FoodMetaDto>;

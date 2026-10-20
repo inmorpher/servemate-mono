@@ -1,5 +1,5 @@
-import type { components } from '@/shared/api/api-types';
+import type { DrinkItemDTO, FoodItemDTO } from '@servemate/shared-dto';
 
-export type FoodItem = components['schemas']['foodItemSchema'];
-export type DrinkItem = components['schemas']['drinkItemSchema'];
+export type FoodItem = FoodItemDTO;
+export type DrinkItem = DrinkItemDTO;
 export type CardItem = FoodItem | DrinkItem;

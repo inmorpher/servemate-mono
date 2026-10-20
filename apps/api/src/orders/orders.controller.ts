@@ -25,7 +25,7 @@ import {
   OrderUpdateItems,
   OrderUpdateItemsSchema,
   OrderUpdateSchema,
-} from './dto';
+} from '@servemate/shared-dto';
 import { IOrdersService } from './orders.service.interface';
 
 const OrderIdSchema = z.object({

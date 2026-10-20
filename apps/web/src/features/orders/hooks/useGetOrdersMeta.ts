@@ -1,11 +1,11 @@
 'use client';
 
-import { OrderMetaDTO } from '@servemate/dto';
+import { OrderMetaDto } from '@servemate/shared-dto';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { orderApiClient } from '../api';
 
 export const useGetOrdersMeta = () => {
-	return useQuery<OrderMetaDTO>({
+	return useQuery<OrderMetaDto>({
 		queryKey: ['orders', 'meta'],
 		queryFn: () => orderApiClient.getMeta(),
 		placeholderData: keepPreviousData,

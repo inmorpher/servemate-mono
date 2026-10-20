@@ -6,7 +6,7 @@ import {
   OrderResponseDto,
   OrderSearchResultDto,
   OrderUpdate,
-} from './dto';
+} from '@servemate/shared-dto';
 
 export interface OrderItemCreateData {
   guestNumber: number;

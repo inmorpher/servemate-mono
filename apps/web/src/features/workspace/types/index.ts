@@ -1,11 +1,12 @@
-import type { components, paths } from '@/shared/api/api-types';
+import type {
+	UpdateWorkspaceDto,
+	Workspace,
+	WorkspaceBootstrapDto,
+	WorkspaceSettings,
+	WorkspaceTab,
+} from '@servemate/shared-dto';
 
-export type Workspace = components['schemas']['WorkspaceSchema'];
-export type WorkspaceTab = components['schemas']['WorkspaceTabSchema'];
-export type WorkspaceSettings = components['schemas']['WorkspaceSettingsSchema'];
-export type WorkspaceBootstrap =
-	paths['/api/workspace/bootstrap']['get']['responses'][200]['content']['application/json'];
-export type WorkspaceUpdate =
-	paths['/api/workspace']['put']['requestBody']['content']['application/json'];
-export type WorkspaceUpdateResponse =
-	paths['/api/workspace']['put']['responses'][200]['content']['application/json'];
+export type { Workspace, WorkspaceSettings, WorkspaceTab };
+export type WorkspaceBootstrap = WorkspaceBootstrapDto;
+export type WorkspaceUpdate = UpdateWorkspaceDto;
+export type WorkspaceUpdateResponse = Workspace;

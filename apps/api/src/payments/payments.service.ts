@@ -11,7 +11,7 @@ import {
   PaymentMetaDto,
   PaymentSearchCriteria,
   RefundDTO,
-} from './dto';
+} from '@servemate/shared-dto';
 import { IPaymentsRepository } from './payments.repository.interface';
 import { IPaymentsService } from './payments.service.interface';
 

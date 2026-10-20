@@ -6,7 +6,7 @@ import {
   TableMetaDto,
   TableQueryDto,
   TableUpdateDto,
-} from './dto';
+} from '@servemate/shared-dto';
 
 export interface ITablesService {
   getMeta(): Promise<TableMetaDto>;

@@ -42,7 +42,7 @@ export const useWorkspaceAutosave = (enabled: boolean) => {
 					pinned: tab.pinned,
 					order,
 				})),
-				activeTabId: activeTabId || undefined,
+				activeTabId: activeTabId || null,
 				settings: cached?.workspace.settings ?? {},
 			};
 		};

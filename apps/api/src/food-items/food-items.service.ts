@@ -12,7 +12,7 @@ import {
   FoodMetaDto,
   SearchFoodItemsDTO,
   UpdateFoodItemDTO,
-} from './dto';
+} from '@servemate/shared-dto';
 import { IFoodItemsRepository } from './food-items.repository.interface';
 import { IFoodItemsService } from './food-items.service.interface';
 

@@ -5,7 +5,7 @@ import { Pagination } from '@/shared/components/pagination';
 import { Tab } from '@/shared/components/tabs/types/tabs.type';
 import { useListPageState } from '@/shared/hooks/useListPageState';
 import { ListPageLayout } from '@/shared/layouts/ListPageLayout';
-import { UserSearchCriteria } from '@servemate/dto';
+import { UserQueryDto } from '@servemate/shared-dto';
 import { useGetUsers } from '../hooks/useUsers';
 import UserSearchBar from './UserSearchBar';
 import { UsersList } from './table/UsersList';
@@ -20,7 +20,7 @@ import { UsersList } from './table/UsersList';
 
 const UserClientPage = ({ tabId }: { tabId: Tab['id'] }) => {
 	const { filters, handleSortChange, handlePageChange, handlePageSizeChange } =
-		useListPageState<UserSearchCriteria>({ tabId });
+		useListPageState<UserQueryDto>({ tabId });
 
 	const { isLoading, data } = useGetUsers(filters || {});
 

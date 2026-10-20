@@ -1,5 +1,4 @@
-import type { paths } from '@/shared/api/api-types';
+import type { UserListItem } from '@servemate/shared-dto';
 
-export type User =
-	paths['/api/users']['get']['responses']['200']['content']['application/json']['users'][number];
-export type UserListItem = User;
+export type User = UserListItem;
+export type { UserListItem };

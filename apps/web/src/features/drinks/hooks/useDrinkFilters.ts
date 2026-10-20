@@ -3,6 +3,8 @@
 import { useTabs, useTabsStoreApi } from '@/shared/components/tabs/store/useTabs';
 import type { Tab } from '@/shared/components/tabs/types/tabs.type';
 import { useEffect, useRef, useState } from 'react';
+import { parseEnumValue } from '@/shared/utils/parseEnumValue';
+import { DrinkCategory } from '@servemate/shared-dto';
 import type { DrinkSearchCriteria } from '../types';
 
 type TextFilterKey = 'name';
@@ -82,7 +84,7 @@ export const useDrinkFilters = (tabId: Tab['id']) => {
 	};
 
 	const handleCategoryChange = (value: string) => {
-		updateFilters({ category: value || undefined });
+		updateFilters({ category: parseEnumValue(DrinkCategory, value) });
 	};
 
 	const handleAvailabilityChange = (value: string) => {

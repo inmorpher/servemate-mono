@@ -1,7 +1,7 @@
 'use client';
 
 import { useMutation } from '@tanstack/react-query';
-import { OrderUpdateItems } from '@servemate/dto';
+import { OrderUpdateItems } from '@servemate/shared-dto';
 import { orderApiClient } from '../api';
 
 export const useUpdateOrderItems = () => {

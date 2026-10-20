@@ -33,7 +33,7 @@ export const getWorkspaceBootstrapOnServer = async (): Promise<WorkspaceBootstra
 
 		if (workspaceResponse.ok) {
 			const workspace = (await workspaceResponse.json()) as Workspace;
-			return { workspace };
+			return { workspace, activeTab: null, activeTabData: null };
 		}
 
 		throw new Error(

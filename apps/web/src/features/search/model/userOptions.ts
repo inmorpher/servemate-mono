@@ -1,4 +1,4 @@
-import { UserRole, UserSortColumn } from '@servemate/dto';
+import { UserRole, UserSortColumn } from '@servemate/shared-dto';
 
 /**
  * Provides configuration options for searching users.

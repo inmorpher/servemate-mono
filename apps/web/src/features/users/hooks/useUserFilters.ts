@@ -3,16 +3,16 @@
 import { useTabs } from '@/shared/components/tabs/store/useTabs';
 import { Tab } from '@/shared/components/tabs/types/tabs.type';
 import { useDebounce } from '@/shared/hooks/useDebounce';
-import { UserSearchCriteria } from '@servemate/dto';
+import { UserQueryDto } from '@servemate/shared-dto';
 import { useEffect, useState } from 'react';
 
 export type UseUserFiltersReturn = {
-	filters: Partial<UserSearchCriteria> | undefined;
+	filters: Partial<UserQueryDto> | undefined;
 	nameValue: string;
 	emailValue: string;
 	setNameValue: (value: string) => void;
 	setEmailValue: (value: string) => void;
-	handleRoleToggle: (role: UserSearchCriteria['role']) => void;
+	handleRoleToggle: (role: UserQueryDto['role']) => void;
 	handleStatusToggle: (status: boolean) => void;
 	handleCreatedAfterChange: (date: Date | undefined) => void;
 	handleCreatedBeforeChange: (date: Date | undefined) => void;
@@ -21,7 +21,7 @@ export type UseUserFiltersReturn = {
 };
 
 export const useUserFilters = (): UseUserFiltersReturn => {
-	const currentTab: Tab<UserSearchCriteria> | undefined = useTabs((state) =>
+	const currentTab: Tab<UserQueryDto> | undefined = useTabs((state) =>
 		state.getTabById(state.activeTabId),
 	);
 	const updateTab = useTabs((state) => state.updateTab);
@@ -70,7 +70,7 @@ export const useUserFilters = (): UseUserFiltersReturn => {
 		});
 	}, [currentTab, debouncedEmail, filters, updateTab]);
 
-	const handleRoleToggle = (role: UserSearchCriteria['role']) => {
+	const handleRoleToggle = (role: UserQueryDto['role']) => {
 		if (!currentTab) {
 			return;
 		}

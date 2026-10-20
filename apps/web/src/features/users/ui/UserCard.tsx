@@ -1,5 +1,5 @@
 import { Card } from '@/features/card';
-import { UserListItem } from '@servemate/dto';
+import { UserListItem } from '@servemate/shared-dto';
 import { memo } from 'react';
 import { formatDate, getRoleColor } from '../utils/userHelpers';
 

@@ -1,11 +1,14 @@
-import type { paths } from '@/shared/api/api-types';
+import type {
+	AuthenticatedUser,
+	LoginResult,
+	UserLoginDto,
+} from '@servemate/shared-dto';
 
-export type AuthLoginRequest =
-	paths['/api/auth/login']['post']['requestBody']['content']['application/json'];
-export type AuthLoginResponse =
-	paths['/api/auth/login']['post']['responses']['200']['content']['application/json'];
+export type AuthLoginRequest = UserLoginDto;
+export type AuthLoginResponse = LoginResult;
 
-export type AuthMeResponse =
-	paths['/api/auth/me']['get']['responses']['200']['content']['application/json'];
+export type AuthMeResponse = {
+	user: AuthenticatedUser | null;
+};
 
-export type AuthUser = AuthMeResponse['user'];
+export type AuthUser = AuthenticatedUser;

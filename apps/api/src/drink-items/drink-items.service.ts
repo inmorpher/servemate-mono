@@ -14,7 +14,7 @@ import {
   DrinkMetaDto,
   SearchDrinkItemsDTO,
   UpdateDrinkItemDTO,
-} from './dto';
+} from '@servemate/shared-dto';
 
 @injectable()
 export class DrinkItemsService

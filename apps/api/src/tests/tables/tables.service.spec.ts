@@ -1,6 +1,6 @@
 import { TableCondition } from '@prisma/client';
 import { HTTPError } from '../../errors/http-error.class';
-import { TableDto, TableQueryDto } from '../../tables/dto';
+import { TableDto, TableQueryDto } from '@servemate/shared-dto';
 import { ITablesRepository } from '../../tables/tables.repository.interface';
 import { TablesService } from '../../tables/tables.service';
 

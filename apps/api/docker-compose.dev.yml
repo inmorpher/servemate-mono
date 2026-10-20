@@ -1,16 +1,18 @@
 services:
   servemate-service:
     build:
-      context: .
-      dockerfile: Dockerfile.dev
+      context: ../..
+      dockerfile: apps/api/Dockerfile.dev
     container_name: servemate-service-dev
     ports:
       - "3000:3000"
     volumes:
-      - .:/app              # Синхронизируем весь код
-      - /app/node_modules   # НО node_modules не синхронизируем!
+      - ../..:/app                  # Синхронизируем монорепо
+      - /app/node_modules           # node_modules из образа (linux), не с хоста
+      - /app/apps/api/node_modules
     environment:
       - NODE_ENV=development
+      - PORT=3000
       - DATABASE_URL=${DATABASE_URL}
       - CHOKIDAR_USEPOLLING=true
       - WATCHPACK_POLLING=true
@@ -22,15 +24,16 @@ services:
 
   mcp:
     build:
-      context: .
-      dockerfile: Dockerfile.dev
+      context: ../..
+      dockerfile: apps/api/Dockerfile.dev
     container_name: servemate-mcp-dev
     command: ["npm", "run", "mcp"]
     stdin_open: true
     tty: true
     volumes:
-      - .:/app
+      - ../..:/app
       - /app/node_modules
+      - /app/apps/api/node_modules
     environment:
       - NODE_ENV=development
       - DATABASE_URL=${DATABASE_URL}
@@ -44,4 +47,4 @@ services:
 
 networks:
   servemate-network:
-    external: true
+    driver: bridge

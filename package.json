@@ -1,0 +1,12 @@
+{
+  "name": "servemate-monorepo",
+  "private": true,
+  "packageManager": "pnpm@11.1.2",
+  "scripts": {
+    "build:dto": "pnpm --filter @servemate/shared-dto build",
+    "dev": "pnpm --parallel --filter servemate-service --filter servemate-client dev",
+    "test": "pnpm test:api && pnpm test:web",
+    "test:api": "pnpm --filter servemate-service test",
+    "test:web": "pnpm --filter servemate-client test"
+  }
+}

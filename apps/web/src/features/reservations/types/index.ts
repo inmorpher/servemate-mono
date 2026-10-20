@@ -1,13 +1,18 @@
-import type { paths } from '@/shared/api/api-types';
+import type {
+	ReservationDto,
+	ReservationListResponse,
+	ReservationMetaDto,
+	ReservationQueryDto,
+} from '@servemate/shared-dto';
 
-export type ReservationSearchCriteria = Omit<
-	Partial<paths['/api/reservations']['get']['parameters']['query']>,
-	'sortOrder'
+// Filters live in tab state and the URL, so dates are kept as the ISO strings sent to the API.
+export type ReservationSearchCriteria = Partial<
+	Omit<ReservationQueryDto, 'timeStart' | 'timeEnd'>
 > & {
-	sortOrder?: 'asc' | 'desc';
+	timeStart?: string;
+	timeEnd?: string;
 };
-export type ReservationListResult =
-	paths['/api/reservations']['get']['responses'][200]['content']['application/json'];
-export type ReservationListItem = ReservationListResult['list'][number];
-export type ReservationsMeta =
-	paths['/api/reservations/meta']['get']['responses'][200]['content']['application/json'];
+
+export type ReservationListResult = ReservationListResponse;
+export type ReservationListItem = ReservationDto;
+export type ReservationsMeta = ReservationMetaDto;

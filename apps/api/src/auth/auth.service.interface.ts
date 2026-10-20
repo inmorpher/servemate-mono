@@ -1,5 +1,5 @@
-import { AuthenticatedUser, UserLoginDto } from '../users/dto';
-import { LoginResult, SessionMetadata, TokenPair } from './dto/auth.dto';
+import { AuthenticatedUser, UserLoginDto } from '@servemate/shared-dto';
+import { LoginResult, SessionMetadata, TokenPair } from '@servemate/shared-dto';
 
 export interface IAuthService {
   login(

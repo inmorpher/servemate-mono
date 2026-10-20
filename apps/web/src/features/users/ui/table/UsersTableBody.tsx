@@ -1,12 +1,12 @@
 import { Table } from '@/shared/components/table';
-import { UserSearchCriteria } from '@servemate/dto';
+import { UserQueryDto } from '@servemate/shared-dto';
 import { UserTableRow } from './UserTableRow';
 import { UsersListItem } from './UsersList';
 
 interface UserTableBodyProps {
 	users?: UsersListItem[];
 	isLoading?: boolean;
-	sortBy?: UserSearchCriteria['sortBy'];
+	sortBy?: UserQueryDto['sortBy'];
 	onDelete: (userId: number) => void;
 }
 

@@ -1,4 +1,4 @@
-import { UserResponseSchema } from '../../users/dto';
+import { UserResponseSchema } from '@servemate/shared-dto';
 
 describe('UserResponseSchema', () => {
   it('does not expose the password field', () => {

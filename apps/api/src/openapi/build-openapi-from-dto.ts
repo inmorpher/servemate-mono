@@ -29,14 +29,7 @@ function isZodSchema(value: unknown): value is z.ZodTypeAny {
 
 function loadDtoSchemas() {
   const dtoModules = [
-    '../drink-items/dto',
-    '../food-items/dto',
-    '../orders/dto',
-    '../payments/dto',
-    '../reservations/dto',
-    '../tables/dto',
-    '../users/dto',
-    '../workspace/dto',
+    '@servemate/shared-dto',
     './response-schemas',
   ].map(modulePath => require(modulePath) as Record<string, unknown>);
 

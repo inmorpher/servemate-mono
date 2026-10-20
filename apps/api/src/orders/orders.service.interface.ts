@@ -6,7 +6,7 @@ import {
   OrderSearchResultDto,
   OrderUpdate,
   OrderUpdateItems,
-} from './dto';
+} from '@servemate/shared-dto';
 
 export interface IOrdersService {
   findOrders(criteria: OrderQuery): Promise<OrderSearchResultDto>;

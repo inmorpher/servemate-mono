@@ -2,21 +2,21 @@
 
 import { ActionMenu } from '@/shared/components/action-menu/ActionMenu';
 import { Table } from '@/shared/components/table';
-import { OrderSearchCriteria, OrderSearchListResult, OrderSortOptions } from '@servemate/dto';
+import { OrderQuery, OrderSearchResultDto, OrderSortOptions } from '@servemate/shared-dto';
 import { Pencil, Phone, Printer, Trash2 } from 'lucide-react';
 import { useCallback } from 'react';
 import { useCallOrderItems } from '../hooks/useCallOrderItems';
 import { useDeleteOrder } from '../hooks/useDeleteOrder';
 import { usePrintOrderItems } from '../hooks/usePrintOrderItems';
 import { formatCurrency, formatDate, getStatusColor } from '../utils/orderHelpers';
-export type OrderListItem = OrderSearchListResult['orders'][number];
+export type OrderListItem = OrderSearchResultDto['orders'][number];
 
 export interface OrderListProps {
 	orders: OrderListItem[] | undefined;
 	isLoading?: boolean;
-	sortBy?: OrderSearchCriteria['sortBy'];
-	sortOrder?: OrderSearchCriteria['sortOrder'];
-	onSortChange: (sortBy: NonNullable<OrderSearchCriteria['sortBy']>) => void;
+	sortBy?: OrderQuery['sortBy'];
+	sortOrder?: OrderQuery['sortOrder'];
+	onSortChange: (sortBy: NonNullable<OrderQuery['sortBy']>) => void;
 	onEditOrder?: (order: OrderListItem) => void;
 }
 
@@ -24,12 +24,12 @@ const columns = [
 	{ label: 'Order', sortBy: OrderSortOptions.ID },
 	{ label: 'Status', sortBy: OrderSortOptions.STATUS },
 	{ label: 'Table', sortBy: OrderSortOptions.TABLE_NUMBER },
-	{ label: 'Guests', sortBy: OrderSortOptions.GUESTS_NUMBER },
+	{ label: 'Guests', sortBy: OrderSortOptions.GUESTS_COUNT },
 	{ label: 'Total', sortBy: OrderSortOptions.TOTAL_AMOUNT },
 	{ label: 'Time', sortBy: OrderSortOptions.ORDER_TIME },
 ] as const satisfies ReadonlyArray<{
 	label: string;
-	sortBy: NonNullable<OrderSearchCriteria['sortBy']>;
+	sortBy: NonNullable<OrderQuery['sortBy']>;
 }>;
 
 export const OrderList = ({
@@ -45,7 +45,7 @@ export const OrderList = ({
 	const callOrderItemsMutation = useCallOrderItems();
 
 	const isActiveColumn = useCallback(
-		(columnSortBy: NonNullable<OrderSearchCriteria['sortBy']>) => sortBy === columnSortBy,
+		(columnSortBy: NonNullable<OrderQuery['sortBy']>) => sortBy === columnSortBy,
 		[sortBy],
 	);
 
@@ -123,7 +123,7 @@ export const OrderList = ({
 									{order.tableNumber}
 								</Table.Cell>
 								<Table.Cell
-									data-active={isActiveColumn(OrderSortOptions.GUESTS_NUMBER)}
+									data-active={isActiveColumn(OrderSortOptions.GUESTS_COUNT)}
 								>
 									{order.guestsCount}
 								</Table.Cell>

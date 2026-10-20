@@ -5,7 +5,7 @@ import {
   PaymentMetaDto,
   PaymentSearchCriteria,
   RefundDTO,
-} from './dto';
+} from '@servemate/shared-dto';
 
 export interface IPaymentsRepository {
   getMeta(): Promise<PaymentMetaDto>;

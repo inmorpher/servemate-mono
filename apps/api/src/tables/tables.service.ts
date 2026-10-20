@@ -14,7 +14,7 @@ import {
   TableQueryDto,
   TableSortColumn,
   TableUpdateDto,
-} from './dto';
+} from '@servemate/shared-dto';
 import { ITablesRepository } from './tables.repository.interface';
 import { ITablesService } from './tables.service.interface';
 

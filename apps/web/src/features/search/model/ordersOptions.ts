@@ -1,4 +1,4 @@
-import { Allergies, OrderSortOptions, OrderState } from '@servemate/dto';
+import { Allergy, OrderSortOptions, OrderState } from '@servemate/shared-dto';
 
 /**
  * Provides configuration options for searching orders.
@@ -9,7 +9,7 @@ import { Allergies, OrderSortOptions, OrderState } from '@servemate/dto';
  */
 export const orderSearchOptions = {
 	allergies: [
-		...Object.entries(Allergies).map(([key, value]) => ({
+		...Object.entries(Allergy).map(([key, value]) => ({
 			label: key,
 			value: value,
 		})),

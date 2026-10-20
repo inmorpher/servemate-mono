@@ -26,7 +26,7 @@ import {
   UserParamsSchema,
   UserQueryDto,
   UserQuerySchema,
-} from './dto';
+} from '@servemate/shared-dto';
 import { IUsersController } from './users.controller.interface';
 import { IUsersService } from './users.service.interface';
 

@@ -3,7 +3,7 @@ import {
   TableCreateSchema,
   TableQuerySchema,
   TableUpdateSchema,
-} from '../../tables/dto';
+} from '@servemate/shared-dto';
 
 describe('Table DTOs', () => {
   it('applies defaults for table creation and queries', () => {

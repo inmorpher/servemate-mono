@@ -1,4 +1,4 @@
-import { UserResponse } from '../users/dto';
+import { UserResponse } from '@servemate/shared-dto';
 import { AccessToken } from './entities/access-token.vo';
 import { RefreshToken } from './entities/refresh-token.vo';
 

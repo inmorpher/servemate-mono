@@ -1,15 +1,15 @@
 import { useTabs } from '@/shared/components/tabs/store/useTabs';
 import { Tab } from '@/shared/components/tabs/types/tabs.type';
-import { Allergies, OrderMetaDTO, OrderSearchCriteria, OrderState } from '@servemate/dto';
+import { Allergy, OrderMetaDto, OrderQuery, OrderState } from '@servemate/shared-dto';
 import { useGetOrdersMeta } from './useGetOrdersMeta';
 
 export interface OrdersListPageProps {
 	tabId: Tab['id'];
-	tab?: Tab<OrderSearchCriteria> | undefined;
+	tab?: Tab<OrderQuery> | undefined;
 }
 export const useOrderFilters = () => {
 	// Fetching metadata for filters (like available statuses, tables, etc.)
-	const { data: metaData }: { data: OrderMetaDTO | undefined } = useGetOrdersMeta();
+	const { data: metaData }: { data: OrderMetaDto | undefined } = useGetOrdersMeta();
 
 	// Getting state from Zustand store for tabs
 	const currentTab = useTabs((state) => state.getTabById(state.activeTabId));
@@ -28,7 +28,7 @@ export const useOrderFilters = () => {
 	}
 
 	const filters:
-		| (Partial<OrderSearchCriteria> & { fromDate?: string; toDate?: string })
+		| (Partial<OrderQuery> & { fromDate?: string; toDate?: string })
 		| undefined = currentTab.filters;
 
 	// Handlers
@@ -47,11 +47,11 @@ export const useOrderFilters = () => {
 
 	// Handle allergy toggle
 	const handleAllergyToggle = (allergy: string) => {
-		const currentAllergies: Allergies[] = filters?.allergies || [];
+		const currentAllergies: Allergy[] = filters?.allergies || [];
 
-		const newAllergies = currentAllergies.includes(allergy as Allergies)
+		const newAllergies = currentAllergies.includes(allergy as Allergy)
 			? currentAllergies.filter((a) => a !== allergy)
-			: [...currentAllergies, allergy as Allergies];
+			: [...currentAllergies, allergy as Allergy];
 
 		updateTab(currentTab.id, {
 			filters: { ...filters, allergies: newAllergies },
@@ -96,7 +96,7 @@ export const useOrderFilters = () => {
 	};
 
 	return {
-		metaData: metaData as OrderMetaDTO | undefined,
+		metaData: metaData as OrderMetaDto | undefined,
 		filters,
 		handleAllergyToggle,
 		handlePriceRangeChange,

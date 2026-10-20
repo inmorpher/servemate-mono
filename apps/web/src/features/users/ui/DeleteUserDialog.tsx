@@ -9,7 +9,7 @@ import {
 	AlertDialogTitle,
 } from '@/shared/components/alert-dialog/AlertDialog';
 import { Button } from '@/shared/components/button';
-import { UserListItem } from '@servemate/dto';
+import { UserListItem } from '@servemate/shared-dto';
 import { useDeleteUser } from '../hooks/useDeleteUser';
 
 interface DeleteUserDialogProps {

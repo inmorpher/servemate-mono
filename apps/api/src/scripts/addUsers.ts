@@ -4,7 +4,7 @@ import { PrismaClient, UserRole } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import 'dotenv/config';
 
-import type { CreateUserDto as CreateUser } from '../users/dto/create-user.dto';
+import type { CreateUserDto as CreateUser } from '@servemate/shared-dto';
 import { hashPassword } from '../utils/password';
 
 const connectionString =

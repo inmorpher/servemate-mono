@@ -1,6 +1,6 @@
-import { UpdateWorkspaceDto } from './dto/update-workspace.dto';
-import { WorkspaceBootstrapDto } from './dto/workspace-bootstrap.dto';
-import { Workspace } from './dto/workspace.dto';
+import { UpdateWorkspaceDto } from '@servemate/shared-dto';
+import { WorkspaceBootstrapDto } from '@servemate/shared-dto';
+import { Workspace } from '@servemate/shared-dto';
 
 export interface IWorkspaceService {
   getWorkspace(userId: number): Promise<Workspace>;

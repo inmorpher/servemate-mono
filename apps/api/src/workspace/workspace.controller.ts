@@ -11,8 +11,8 @@ import { TYPES } from '../types';
 import {
   UpdateWorkspaceDto,
   UpdateWorkspaceSchema,
-} from './dto/update-workspace.dto';
-import { Workspace } from './dto/workspace.dto';
+} from '@servemate/shared-dto';
+import { Workspace } from '@servemate/shared-dto';
 import { IWorkspaceService } from './workspace.service.interface';
 
 @injectable()

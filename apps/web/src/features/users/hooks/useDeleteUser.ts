@@ -1,6 +1,6 @@
 'use client';
 
-import { UserListResult } from '@servemate/dto';
+import { UserListResponse } from '@servemate/shared-dto';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { usersApiClient } from '../api';
 
@@ -11,11 +11,11 @@ export const useDeleteUser = () => {
 		onMutate: async ({ id }: { id: string }) => {
 			await queryClient.cancelQueries({ queryKey: ['users'] });
 
-			const previousUserQueries = queryClient.getQueriesData<UserListResult>({
+			const previousUserQueries = queryClient.getQueriesData<UserListResponse>({
 				queryKey: ['users'],
 			});
 
-			queryClient.setQueriesData<UserListResult>({ queryKey: ['users'] }, (currentData) => {
+			queryClient.setQueriesData<UserListResponse>({ queryKey: ['users'] }, (currentData) => {
 				if (!currentData?.users) {
 					return currentData;
 				}

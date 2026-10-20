@@ -1,6 +1,6 @@
-import { OrderSearchListResult } from '@servemate/dto';
+import { OrderSearchResultDto } from '@servemate/shared-dto';
 
-type OrderStatus = OrderSearchListResult['orders'][number]['status'];
+type OrderStatus = OrderSearchResultDto['orders'][number]['status'];
 
 const getStatusColor = (status: OrderStatus) => {
 	switch (status) {

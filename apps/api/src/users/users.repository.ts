@@ -3,7 +3,7 @@ import { compare } from 'bcrypt';
 import { inject, injectable } from 'inversify';
 import 'reflect-metadata';
 import { TYPES } from '../types';
-import { UserFilters, UserListItem, UserMetaDto, UserSortColumn } from './dto';
+import { UserFilters, UserListItem, UserMetaDto, UserSortColumn } from '@servemate/shared-dto';
 export type UserPagination = {
   page: number;
   pageSize: number;

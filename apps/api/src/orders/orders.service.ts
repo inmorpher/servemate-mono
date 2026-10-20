@@ -13,7 +13,7 @@ import {
   OrderSearchResultDto,
   OrderUpdate,
   OrderUpdateItems,
-} from './dto';
+} from '@servemate/shared-dto';
 import { IOrdersRepository } from './orders.repository.interface';
 import { IOrdersService } from './orders.service.interface';
 

@@ -1,10 +1,10 @@
 import { Allergy, OrderState } from '@prisma/client';
-import { OrderCreateSchema } from '../../orders/dto/order-create.dto';
-import { OrderQuerySchema } from '../../orders/dto/order-query.dto';
+import { OrderCreateSchema } from '@servemate/shared-dto';
+import { OrderQuerySchema } from '@servemate/shared-dto';
 import {
   OrderUpdateItemsSchema,
   OrderUpdateSchema,
-} from '../../orders/dto/order-update.dto';
+} from '@servemate/shared-dto';
 
 describe('Orders DTO schemas', () => {
   it('parses a singular tableNumber query parameter', () => {

@@ -15,7 +15,7 @@ import {
   OrderResponseDto,
   OrderSearchResultDto,
   OrderUpdate,
-} from './dto';
+} from '@servemate/shared-dto';
 import {
   IOrdersRepository,
   OrderCreateData,

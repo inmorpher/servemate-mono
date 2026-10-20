@@ -15,7 +15,7 @@ import {
   ReservationQueryDto,
   ReservationStatus,
   ReservationUpdateDto,
-} from './dto';
+} from '@servemate/shared-dto';
 import { IReservationsRepository } from './reservations.repository.interface';
 import { IReservationsService } from './reservations.service.interface';
 

@@ -1,14 +1,12 @@
-import type { paths } from '@/shared/api/api-types';
+import type {
+	TableDto,
+	TableListResponse,
+	TableMetaDto,
+	TableQueryDto,
+} from '@servemate/shared-dto';
 
-export type TableSearchCriteria = Omit<
-	Partial<paths['/api/tables']['get']['parameters']['query']>,
-	'sortOrder'
-> & {
-	sortOrder?: 'asc' | 'desc';
-};
+export type TableSearchCriteria = Partial<TableQueryDto>;
 
-export type TablesListResult =
-	paths['/api/tables']['get']['responses'][200]['content']['application/json'];
-export type RestaurantTable = TablesListResult['tables'][number];
-export type TablesMeta =
-	paths['/api/tables/meta']['get']['responses'][200]['content']['application/json'];
+export type TablesListResult = TableListResponse;
+export type RestaurantTable = TableDto;
+export type TablesMeta = TableMetaDto;

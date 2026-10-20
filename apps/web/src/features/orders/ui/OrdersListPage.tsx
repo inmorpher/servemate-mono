@@ -6,14 +6,14 @@ import { Tab } from '@/shared/components/tabs/types/tabs.type';
 import { useListPageState } from '@/shared/hooks/useListPageState';
 import { ListError } from '@/shared/layouts/Error';
 import { ListPageLayout } from '@/shared/layouts/ListPageLayout';
-import { OrderSearchCriteria } from '@servemate/dto';
+import { OrderQuery } from '@servemate/shared-dto';
 import { useGetOrdersAndMeta } from '../hooks/useGetOrdersAndMeta';
 import OrderFilters from './OrderFilters';
 import { OrderList } from './OrderList';
 
 export const OrdersListPage = ({ tabId }: { tabId: Tab['id'] }) => {
 	const { filters, handleSortChange, handlePageChange, handlePageSizeChange } =
-		useListPageState<OrderSearchCriteria>({ tabId });
+		useListPageState<OrderQuery>({ tabId });
 
 	const { orders } = useGetOrdersAndMeta(filters || {});
 	const { data, error, isError, isLoading, refetch } = orders;

@@ -35,7 +35,7 @@ import {
   ReservationTimeSchema,
   ReservationUpdateDto,
   ReservationUpdateSchema,
-} from './dto';
+} from '@servemate/shared-dto';
 import { IReservationsService } from './reservations.service.interface';
 
 export type ReservationsControllerService = Pick<

@@ -5,7 +5,7 @@ import {
   DrinkMetaDto,
   SearchDrinkItemsDTO,
   UpdateDrinkItemDTO,
-} from './dto';
+} from '@servemate/shared-dto';
 
 export interface IDrinkItemsRepository {
   getMeta(): Promise<DrinkMetaDto>;
