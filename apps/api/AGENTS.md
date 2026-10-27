@@ -1,34 +1,49 @@
-# AGENTS.md
+# AGENTS.md (API)
 
-This repository contains the ServeMate backend service. It is a TypeScript/Express application with Prisma, Inversify DI, Zod validation, and a shared DTO workspace package.
+Express 5 REST and WebSocket API. Uses Inversify for dependency injection, Prisma 7 with PostgreSQL, and Zod for validation through `@servemate/shared-dto`.
 
-## What to know first
-- Start from [README.md](README.md) and [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) for the broader architecture.
-- Main runtime entry points are [main.ts](main.ts), [app.ts](app.ts), and [src/app.ts](src/app.ts).
-- Business logic lives under [src/services](src/services); controllers under [src/controllers](src/controllers) should stay thin.
-- Shared DTOs and validation schemas live in [dto-package/src/dto](dto-package/src/dto).
+Run from `apps/api` or with `pnpm --filter servemate-service <script>`.
 
-## Working conventions
-- Keep the existing layered structure: controller -> service -> Prisma/DB access.
-- Prefer Inversify bindings and dependency injection instead of constructing services directly.
-- Use Zod schemas for request/query validation and keep shared DTO changes in the DTO package.
-- Preserve the existing error handling style: use the service-level error wrapper and HTTPError for domain failures.
-- Read/write caching is handled with decorators in [src/decorators](src/decorators); update invalidation when mutating data.
+```bash
+pnpm dev                 # tsx watch main.ts on port 3001 (set PORT=3001 in .env)
+pnpm test                # Jest with coverage
+pnpm build               # tsc to dist/
+pnpm exec prisma generate
+pnpm exec prisma migrate dev --name <name>
+```
 
-## Project-specific pitfalls
-- Prisma dynamic `orderBy` fields must be validated before use. Avoid passing untrusted sort names directly into Prisma queries.
-- When changing DTOs, update the shared package and regenerate artifacts if the repository expects them.
-- Prisma generation can be fragile in pnpm-based setups; prefer the project’s Prisma generation flow when schema changes are involved.
+## Module layout
 
-## Useful commands
-- Build: `npm run build`
-- Run tests: `npm test`
-- Start dev server: `npm run dev`
-- Generate DTOs: `npm run generate-dto`
-- Prisma generation: `pnpm exec prisma generate` when needed
+Each domain lives in `src/<domain>/` (for example `drink-items`, `tables`, `orders`) and follows the same files:
 
-## Relevant folders
-- [prisma](prisma) for schema and migrations
-- [src/tests](src/tests) for tests
-- [src/scripts](src/scripts) for seed/data scripts
-- [docker-compose.yml](docker-compose.yml) and [docker-compose.dev.yml](docker-compose.dev.yml) for local runtime setup
+- `<domain>.controller.ts`: HTTP routes. Extends `BaseController`. Uses decorators from `src/decorators/httpDecorators.ts`.
+- `<domain>.service.interface.ts` and `<domain>.service.ts`: business logic. Depends on the repository interface only.
+- `<domain>.repository.interface.ts` and `<domain>.repository.ts`: Prisma access.
+- `<domain>.container.ts`: an Inversify `ContainerModule` that binds the three classes above.
+
+Reference module: `src/drink-items/`. Copy its shape for new modules.
+
+Registration steps for a new module:
+
+1. Add symbols to `TYPES` in `src/types.ts`.
+2. Export the container module and load it in `main.ts`.
+3. Export new DTOs from `packages/dto/src` and rebuild with `pnpm build:dto`.
+
+## Rules
+
+- Validate request bodies and params with the Zod schemas from `@servemate/shared-dto` using `@Validate(schema, 'body' | 'params' | 'query')`.
+- Protect routes with `@Roles([...])`. Roles come from the Prisma `UserRole` enum.
+- Inject dependencies with `@inject(TYPES.X)`. Do not instantiate services or repositories by hand.
+- Throw the HTTP error classes in `src/errors/`. The global exception filter formats the response.
+- Log through `ILogger` (`TYPES.ILogger`), not `console.log`.
+- Environment variables are validated in `env.ts` (Zod). Add new variables there and in `apps/api/README.md`.
+- Tests go in `src/tests/<domain>/` as `*.spec.ts`. Cover the service and the controller. Use the existing specs as templates.
+
+## Gotchas
+
+- `main.ts` is the composition root. A container module that is not loaded there is not wired. Check startup logs after adding a module.
+- Prisma schema is split across `prisma/models/`, `prisma/enums.prisma`, and `prisma/generators/`. Edit the right file.
+- `env.ts` requires `PRODUCTION`, `LOG_TO_FILE`, and the `JWT_*` variables. Missing values stop startup.
+- `TOKEN_CACHE_TTL` is in milliseconds.
+- CORS allowlist is in `src/app.ts`. Update it when the web origin changes.
+- The MCP server (`src/mcp/server.ts`) is a separate entrypoint, started with `pnpm mcp`.
