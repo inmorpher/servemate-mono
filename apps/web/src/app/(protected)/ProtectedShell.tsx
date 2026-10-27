@@ -47,7 +47,7 @@ const ProtectedShell = ({ children, isWorkspaceLoaded }: ProtectedShellProps) =>
 		<>
 			{/* Header with sticky positioning */}
 			<header
-				className={`bg-ctp-base sticky inset-x-0 top-0 left-0 z-40 flex w-full items-center gap-2 px-4 py-2 lg:h-14`}
+				className={`sticky inset-x-0 top-0 left-0 z-40 flex w-full items-center gap-2 px-4 py-2 lg:h-14`}
 			>
 				{/* App Launcher - Mobile only (<lg) - used for app switcher on small screens */}
 				<div className='flex lg:hidden'>

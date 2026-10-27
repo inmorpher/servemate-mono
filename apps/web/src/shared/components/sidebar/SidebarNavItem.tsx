@@ -26,8 +26,8 @@ export const SidebarNavItem = ({ item }: SidebarNavItemProps) => {
 			title={item.label}
 			className={`focus-visible:ring-ctp-blue relative flex h-11 w-11 items-center justify-center rounded-md transition-colors focus-visible:ring-2 focus-visible:outline-none ${
 				isActive
-					? 'bg-ctp-surface0 text-ctp-blue before:bg-ctp-blue before:absolute before:-left-2 before:h-6 before:w-0.5 before:rounded-r'
-					: 'text-ctp-subtext0 hover:bg-ctp-surface0 hover:text-ctp-text'
+					? 'bg-ctp-base text-ctp-blue before:bg-ctp-blue before:absolute before:-left-2 before:h-6 before:w-0.5 before:rounded-r'
+					: 'text-ctp-subtext0 hover:bg-ctp-base hover:text-ctp-text'
 			}`}
 		>
 			<Icon aria-hidden='true' className='h-5 w-5' />
