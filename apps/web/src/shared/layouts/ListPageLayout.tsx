@@ -68,7 +68,7 @@ export function ListPageLayout({
 			? createPortal(
 					<aside
 						aria-label='Filters'
-						className='border-ctp-surface1 bg-ctp-surface0/80 sticky top-14 hidden h-[calc(100vh-3.5625rem)] w-80 shrink-0 scrollbar-thin self-start overflow-y-scroll p-4 shadow-sm lg:block'
+						className='border-ctp-surface1 sticky top-14 hidden h-[calc(100vh-3.5625rem)] w-80 shrink-0 scrollbar-thin self-start overflow-y-scroll p-4 shadow-sm lg:block'
 					>
 						<div className='space-y-4'>{filters}</div>
 					</aside>,
@@ -129,7 +129,7 @@ export function ListPageLayout({
 											{activeFilters?.map((filter) => (
 												<div
 													key={filter.id}
-													className='border-ctp-surface1 bg-ctp-surface0 text-ctp-text flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm shadow-sm'
+													className='border-ctp-surface1 text-ctp-text flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm shadow-sm'
 												>
 													<span>{filter.label}</span>
 													{filter.onRemove ? (

@@ -5,6 +5,7 @@ import { SearchChip } from '@/features/search/ui/SearchChip';
 import { DatePickerField } from '@/shared/components/date-picker-field/DatePickerField';
 import { Filter } from '@/shared/components/filter';
 import { useUserFilters } from '../hooks/useUserFilters';
+import { FilterWrapper } from '@/shared/components/filter/ui/FilterWrapper';
 
 function UserSearchBar() {
 	const {
@@ -34,8 +35,12 @@ function UserSearchBar() {
 				Clear Filters
 			</button>
 
-			<Filter.Group label='Search'>
+			{/* <Filter.Group label='Search'> */}
+			{/* </Filter.Group> */}
+
+			<FilterWrapper title='Search'>
 				<div className='grid gap-3 md:grid-cols-2'>
+					{' '}
 					<div>
 						<label className='text-ctp-subtext1 mb-2 block text-sm font-medium'>
 							Name
@@ -63,7 +68,7 @@ function UserSearchBar() {
 						/>
 					</div>
 				</div>
-			</Filter.Group>
+			</FilterWrapper>
 
 			<Filter.Group label='Role'>
 				{userSearchOptions.roles.map((option) => (
