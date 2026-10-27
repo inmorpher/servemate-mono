@@ -96,7 +96,11 @@ export class AuthService extends BaseService implements IAuthService {
     metadata?: SessionMetadata
   ): Promise<TokenPair> {
     try {
-      const { jti } = await this.tokenService.verifyRefreshToken(refreshToken);
+      const { jti } = await this.tokenService
+        .verifyRefreshToken(refreshToken)
+        .catch(() => {
+          throw new HTTPError(401, this.serviceName, 'Invalid refresh token');
+        });
       const session = await this.authRepository.findByJti(jti);
 
       if (!session) {

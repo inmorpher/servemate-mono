@@ -128,4 +128,13 @@ describe('AuthService.refresh', () => {
     expect(authRepository.revokeIfActive).not.toHaveBeenCalled();
     expect(authRepository.save).not.toHaveBeenCalled();
   });
+
+  it('returns 401 instead of 500 when the refresh token signature is invalid', async () => {
+    const { service, tokenService } = setup();
+    tokenService.verifyRefreshToken.mockRejectedValue(new Error('invalid signature'));
+
+    await expect(service.refresh('garbage')).rejects.toMatchObject({
+      statusCode: 401,
+    });
+  });
 });
