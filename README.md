@@ -1,24 +1,24 @@
-# ServeMate Monorepo
+# ServeMate
 
-ServeMate is a restaurant management system. This monorepo contains the backend API and the web client.
+ServeMate is a restaurant management system. This monorepo contains the backend API and the web client, plus a shared DTO package.
 
 ## Structure
 
 ```
 ServeMate-monorepo/
 ├── apps/
-│   ├── api/        # servemate-service: Node.js + Express + Prisma (REST API, MCP server)
-│   └── web/        # servemate-client: Next.js 16 + React 19 + Tailwind CSS 4
+│   ├── api/        # servemate-service: Express + Prisma REST API
+│   └── web/        # servemate-client: Next.js + React client
 ├── packages/
-│   └── dto/        # @servemate/shared-dto: DTOs shared by API and web
+│   └── dto/        # @servemate/shared-dto: types and schemas shared by API and web
 ├── package.json
 └── pnpm-workspace.yaml
 ```
 
 ## Prerequisites
 
-- Node.js 24 (the Docker image uses `node:24.19.0`)
-- pnpm 11.1.2 (`packageManager` in the root `package.json`)
+- Node.js 24
+- pnpm 11.1.2 (pinned in the root `package.json`)
 - PostgreSQL, reachable through `DATABASE_URL`
 - Docker (optional, for containerized API runs)
 
@@ -29,70 +29,43 @@ corepack enable
 corepack prepare pnpm@11.1.2 --activate
 ```
 
-## Getting Started
+## Getting started
 
-### 1. Install dependencies
+1. Install dependencies from the repository root:
 
-Run from the monorepo root. pnpm installs all workspace packages at once:
+   ```bash
+   pnpm install
+   ```
 
-```bash
-pnpm install
-```
+2. Configure environment variables. Each app has its own `.env` file. Do not commit real secrets.
 
-### 2. Configure environment variables
+   - `apps/api/.env`: database URL, JWT secrets, port, and token lifetimes.
+   - `apps/web/.env`: backend URLs and the session secret.
 
-Create the env files for each app. Do not commit real secrets.
+3. Set up the database. The API uses Prisma with the schema in `apps/api/prisma/`:
 
-**`apps/api/.env`**
+   ```bash
+   pnpm --filter servemate-service exec prisma migrate dev
+   ```
 
-| Variable | Description |
-| --- | --- |
-| `PRODUCTION` | Set to `true` in production |
-| `DATABASE_URL` | PostgreSQL connection string |
-| `PORT` | API port. Use a port other than the web app's `3000`, for example `3001` |
-| `LOG_TO_FILE` | Write logs to a file |
-| `TOKEN_CACHE_TTL` | Cache TTL for tokens, in seconds |
-| `JWT_SECRET` | Secret for access tokens |
-| `JWT_REFRESH` | Secret for refresh tokens |
-| `JWT_EXPIRES_IN` | Access token lifetime, for example `15m` |
-| `JWT_REFRESH_EXPIRES_IN` | Refresh token lifetime, for example `7d` |
+   Optionally, fill the database with sample data:
 
-**`apps/web/.env`**
+   ```bash
+   pnpm --filter servemate-service generate-users
+   pnpm --filter servemate-service generate-tables
+   pnpm --filter servemate-service generate-fnb
+   pnpm --filter servemate-service generate-orders
+   ```
 
-| Variable | Description |
-| --- | --- |
-| `API_URL` | Backend URL used by the Next.js server |
-| `NEXT_PUBLIC_API_URL` | Backend URL used by the browser |
-| `SESSION_SECRET` | Secret for the `iron-session` cookie |
+4. Build the shared DTO package. The API and the web app import types from `@servemate/shared-dto`:
 
-### 3. Set up the database
+   ```bash
+   pnpm build:dto
+   ```
 
-The API uses Prisma with the schema in `apps/api/prisma/schema.prisma`:
+## Running
 
-```bash
-pnpm --filter servemate-service exec prisma migrate dev
-```
-
-To fill the database with sample data:
-
-```bash
-pnpm --filter servemate-service generate-users
-pnpm --filter servemate-service generate-tables
-pnpm --filter servemate-service generate-fnb
-pnpm --filter servemate-service generate-orders
-```
-
-### 4. Build the shared DTO package
-
-The API and web app import types from `@servemate/shared-dto`:
-
-```bash
-pnpm build:dto
-```
-
-## Running the Project
-
-Start the API and the web client together:
+Start the API (port `3001`) and the web client (port `3000`) together:
 
 ```bash
 pnpm dev
@@ -101,75 +74,40 @@ pnpm dev
 Or run them separately:
 
 ```bash
-pnpm --filter servemate-service dev   # API, watch mode
-pnpm --filter servemate-client dev    # Web, http://localhost:3000
+pnpm --filter servemate-service dev   # API in watch mode
+pnpm --filter servemate-client dev    # Web at http://localhost:3000
 ```
 
-## Backend API (`apps/api`)
+## Testing
 
-- Built with Express 5, TypeScript, Prisma 7 (PostgreSQL adapter), Inversify, and Zod.
-- Authentication uses JWT access and refresh tokens.
-- Full endpoint reference: [apps/api/README.md](apps/api/README.md).
+```bash
+pnpm test                                    # API (Jest) and web (Vitest)
+pnpm --filter servemate-client lint          # web lint
+```
 
-### Scripts
+## Deployment
+
+- **Web** (`apps/web`) runs on Vercel. It builds the shared DTO package first. See [apps/web/README.md](apps/web/README.md#deployment-vercel).
+- **API** (`apps/api`) runs in Docker on a separate machine, behind HTTPS. See [apps/api/README.md](apps/api/README.md#deployment).
+
+The web app calls the API from the server, so the API needs a public HTTPS URL.
+
+## Root scripts
 
 | Command | Description |
 | --- | --- |
-| `pnpm --filter servemate-service dev` | Start the API with `tsx watch` |
-| `pnpm --filter servemate-service build` | Compile TypeScript to `dist/` |
-| `pnpm --filter servemate-service start:prod` | Run the built app with PM2 |
-| `pnpm --filter servemate-service start:cluster` | Run 4 PM2 cluster instances |
-| `pnpm --filter servemate-service test` | Run Jest with coverage |
-| `pnpm --filter servemate-service openapi:generate` | Generate client types from OpenAPI |
-| `pnpm --filter servemate-service mcp` | Start the read-only MCP server |
+| `pnpm install` | Install all workspace packages |
+| `pnpm build:dto` | Build `@servemate/shared-dto` |
+| `pnpm dev` | Run API and web in parallel |
+| `pnpm test` | Run API and web test suites |
+| `pnpm test:api` | Run API tests only |
+| `pnpm test:web` | Run web tests only |
 
-### Docker
+## Apps
 
-Build from the `apps/api` folder. The build context is the monorepo root:
-
-```bash
-cd apps/api
-docker compose up --build app
-```
-
-The image runs `node dist/main.js` on port `3000`.
-
-### MCP server
-
-The MCP server gives read-only database access to MCP clients such as Claude Desktop:
-
-```bash
-pnpm --filter servemate-service mcp
-```
-
-## Web Client (`apps/web`)
-
-- Built with Next.js 16 (Turbopack in dev), React 19, Tailwind CSS 4, and shadcn/ui components.
-- Server state uses TanStack Query. Client state uses Zustand. Forms use React Hook Form with Zod.
-
-### Scripts
-
-| Command | Description |
-| --- | --- |
-| `pnpm --filter servemate-client dev` | Start the dev server at `http://localhost:3000` |
-| `pnpm --filter servemate-client build` | Create a production build |
-| `pnpm --filter servemate-client start` | Serve the production build |
-| `pnpm --filter servemate-client lint` | Run ESLint |
-| `pnpm --filter servemate-client test` | Run Vitest |
-
-## Tests
-
-Run all tests from the root:
-
-```bash
-pnpm test
-```
-
-This runs `test:api` (Jest) and `test:web` (Vitest).
-
-## Formatting
-
-- Prettier is used in both apps. The web app also uses `prettier-plugin-tailwindcss` to sort class names.
+- [`apps/api`](apps/api): backend service, see its README for scripts, deployment, and the MCP server.
+- [`apps/web`](apps/web): web client, see its README for scripts and architecture.
+- [`packages/dto`](packages/dto): shared DTOs. Rebuild it after changing shared types.
 
 ## Contributing
 

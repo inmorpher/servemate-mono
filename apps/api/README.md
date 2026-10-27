@@ -1,282 +1,131 @@
-# API Documentation
+# ServeMate API
 
-This guide describes the API of our service. Below are examples of endpoints provided by the API along with details on the accepted parameters and returned responses.
+Express 5 + TypeScript REST API for ServeMate. It uses Prisma with PostgreSQL, Inversify for dependency injection, Zod for validation, and JWT access and refresh tokens. It also exposes a read-only MCP server for database access.
 
-## Overview
+Part of the [ServeMate monorepo](../../README.md).
 
-The API is built on Node.js (TypeScript) and follows RESTful principles. All endpoints return data in JSON format. When creating or updating resources, please send the data in JSON format.
+## Stack
 
-## Authentication Endpoints
+- Express 5, TypeScript, Prisma 7 (PostgreSQL adapter)
+- Inversify (DI), Zod and class-validator (validation)
+- JWT access and refresh tokens, bcrypt password hashing
+- WebSocket (`ws`) for workspace events
+- OpenTelemetry, tslog for logging
+- Jest for tests
 
-### POST /auth/login
+## Source layout
 
-- **Description:** Authenticates a user.
-- **Request Body:**
-  ```json
-  {
-  	"email": "user@example.com",
-  	"password": "userPassword"
-  }
-  ```
-- **Successful Response:**
-  ```json
-  {
-  	"token": "jwt_token",
-  	"user": {
-  		"id": "user_id",
-  		"email": "user@example.com"
-  	}
-  }
-  ```
+```
+apps/api/
+├── main.ts            # entry point
+├── env.ts             # env validation (Zod), exports ENV
+├── src/
+│   ├── app.ts         # Express app and server setup
+│   ├── <domain>/      # controllers, services, and routes per domain
+│   ├── decorators/    # caching and invalidation decorators
+│   ├── middleware/    # auth and request middleware
+│   ├── mcp/           # read-only MCP server
+│   ├── openapi/       # OpenAPI generation
+│   ├── scripts/       # seed data scripts
+│   └── tests/         # Jest tests
+├── prisma/            # schema, migrations, generators
+└── generated/         # openapi.json and api-types.ts
+```
 
-### POST /auth/register
+Business logic lives in services. Controllers stay thin. Shared DTOs live in `packages/dto`.
 
-- **Description:** Registers a new user.
-- **Request Body:**
-  ```json
-  {
-  	"name": "User Name",
-  	"email": "user@example.com",
-  	"password": "userPassword"
-  }
-  ```
-- **Successful Response:**
-  ```json
-  {
-  	"id": "new_user_id",
-  	"name": "User Name",
-  	"email": "user@example.com"
-  }
-  ```
+## Environment
 
-## User Endpoints
+Create `apps/api/.env`. Do not commit real secrets.
 
-### GET /users
+| Variable | Description |
+| --- | --- |
+| `PRODUCTION` | `true` in production, `false` locally |
+| `DATABASE_URL` | PostgreSQL connection string |
+| `PORT` | HTTP port. Defaults to `3000`. Locally use `3001`, because the web app runs on `3000`. |
+| `LOG_TO_FILE` | `true` to write logs to a file |
+| `TOKEN_CACHE_TTL` | Token cache TTL in **milliseconds**. Default `3600000` |
+| `JWT_SECRET` | Secret for access tokens |
+| `JWT_REFRESH` | Secret for refresh tokens |
+| `JWT_EXPIRES_IN` | Access token lifetime, for example `15m` |
+| `JWT_REFRESH_EXPIRES_IN` | Refresh token lifetime, for example `7d` |
 
-- **Description:** Retrieves a list of all users.
-- **Query Parameters:** None
-- **Successful Response:**
-  ```json
-  [
-  	{
-  		"id": "user_id",
-  		"name": "User Name",
-  		"email": "user@example.com"
-  	}
-  	// ... other users ...
-  ]
-  ```
+If you change `PORT`, update `API_URL` and `NEXT_PUBLIC_API_URL` in `apps/web/.env` to match.
 
-### GET /users/:id
+## Database
 
-- **Description:** Retrieves information for a specific user by ID.
-- **URL Parameters:**
-  - id: The user identifier
-- **Successful Response:**
-  ```json
-  {
-  	"id": "user_id",
-  	"name": "User Name",
-  	"email": "user@example.com"
-  }
-  ```
-
-### POST /users
-
-- **Description:** Creates a new user.
-- **Request Body:**
-  ```json
-  {
-  	"name": "User Name",
-  	"email": "user@example.com",
-  	"password": "userPassword"
-  }
-  ```
-- **Successful Response:**
-  ```json
-  {
-  	"id": "new_user_id",
-  	"name": "User Name",
-  	"email": "user@example.com"
-  }
-  ```
-
-### PUT /users/:id
-
-- **Description:** Updates a user's information.
-- **URL Parameters:**
-  - id: The user identifier
-- **Request Body:** May include one or more of the following fields:
-  ```json
-  {
-  	"name": "New Name",
-  	"email": "new_email@example.com",
-  	"password": "newPassword"
-  }
-  ```
-- **Successful Response:**
-  ```json
-  {
-  	"id": "user_id",
-  	"name": "New Name",
-  	"email": "new_email@example.com"
-  }
-  ```
-
-### DELETE /users/:id
-
-- **Description:** Deletes a user.
-- **URL Parameters:**
-  - id: The user identifier
-- **Successful Response:**
-  ```json
-  {
-  	"message": "User successfully deleted."
-  }
-  ```
-
-## Order Endpoints
-
-### GET /orders
-
-- **Description:** Retrieves a list of orders with support for filtering and sorting, including by price.
-- **Query Parameters:**
-  - `page` (optional, default: 1): Page number for pagination
-  - `pageSize` (optional, default: 10, max: 100): Number of orders per page
-  - `tableNumbers` (optional): Comma-separated table numbers or array
-  - `serverId` (optional): Server ID to filter by
-  - `serverName` (optional): Server name to filter by (case-insensitive)
-  - `status` (optional): Order status (RECEIVED, AWAITING, COMPLETED, CANCELLED, etc.)
-  - `minAmount` (optional): Minimum order total amount
-  - `maxAmount` (optional): Maximum order total amount
-  - `dateFrom` (optional): Filter orders from this date (ISO format)
-  - `dateTo` (optional): Filter orders until this date (ISO format)
-  - `allergies` (optional): Comma-separated allergies or array
-  - `sortBy` (optional, default: 'id'): Field to sort by. Available options:
-    - `id` - Sort by order ID
-    - `tableNumber` - Sort by table number
-    - `guestsCount` - Sort by number of guests
-    - `orderTime` - Sort by order time
-    - `updatedAt` - Sort by last update time
-    - `status` - Sort by order status
-    - **`totalAmount` - Sort by order total price** ⭐
-  - `sortOrder` (optional, default: 'asc'): Sort order - 'asc' for ascending, 'desc' for descending
-
-- **Example Requests:**
-
-  Sort by price ascending (lowest to highest):
-  ```
-  GET /orders?sortBy=totalAmount&sortOrder=asc&pageSize=20
-  ```
-
-  Sort by price descending (highest to lowest):
-  ```
-  GET /orders?sortBy=totalAmount&sortOrder=desc&pageSize=20
-  ```
-
-  Sort by price with filters:
-  ```
-  GET /orders?sortBy=totalAmount&sortOrder=desc&minAmount=50&maxAmount=500&page=1&pageSize=10
-  ```
-
-- **Successful Response:**
-  ```json
-  {
-    "orders": [
-      {
-        "id": 1,
-        "tableNumber": 5,
-        "guestsCount": 4,
-        "orderTime": "2024-05-15T10:30:00.000Z",
-        "updatedAt": "2024-05-15T10:45:00.000Z",
-        "status": "COMPLETED",
-        "totalAmount": 125.50,
-        "discount": 0,
-        "tip": 0,
-        "comments": null,
-        "completionTime": "2024-05-15T10:45:00.000Z",
-        "server": {
-          "id": 1,
-          "name": "John Doe"
-        }
-      }
-    ],
-    "priceRange": {
-      "min": 50,
-      "max": 500
-    },
-    "dateRange": {
-      "min": "2024-05-01T00:00:00.000Z",
-      "max": "2024-05-15T23:59:59.000Z"
-    },
-    "totalCount": 100,
-    "page": 1,
-    "pageSize": 10,
-    "totalPages": 10
-  }
-  ```
-
-### GET /orders/:id
-
-- **Description:** Retrieves detailed information for a specific order by ID.
-- **URL Parameters:**
-  - id: The order identifier
-- **Successful Response:** Returns full order details with all associated items and metadata.
-
-## Example Usage
-
-For making requests, you can use tools like Postman or cURL. For example, to get orders sorted by price (highest to lowest):
+Run from the monorepo root or from `apps/api`:
 
 ```bash
-curl -X GET "http://localhost:3000/orders?sortBy=totalAmount&sortOrder=desc&pageSize=10" \
-     -H "Authorization: Bearer YOUR_TOKEN"
+pnpm --filter servemate-service exec prisma migrate dev   # apply migrations
+pnpm --filter servemate-service exec prisma generate      # regenerate the Prisma client
 ```
 
-To get orders sorted by price (lowest to highest) with amount filtering:
+Seed data (optional):
 
 ```bash
-curl -X GET "http://localhost:3000/orders?sortBy=totalAmount&sortOrder=asc&minAmount=50&maxAmount=500" \
-     -H "Authorization: Bearer YOUR_TOKEN"
+pnpm --filter servemate-service generate-users
+pnpm --filter servemate-service generate-tables
+pnpm --filter servemate-service generate-fnb
+pnpm --filter servemate-service generate-orders
 ```
 
-## Errors
+Prisma generation can be fragile in pnpm setups. If the client looks stale after a schema change, run `prisma generate` again.
 
-In case of an error, the API returns an object with an `error` field:
+## Scripts
 
-```json
-{
-	"error": "Error description"
-}
-```
+Run from `apps/api`, or prefix with `pnpm --filter servemate-service` from the root.
 
-## Conclusion
+| Script | Description |
+| --- | --- |
+| `dev` | Start with `tsx watch main.ts` |
+| `build` | Clean `dist/` and compile with `tsc` |
+| `start` | Run `dist/main.js` with nodemon |
+| `start:prod` | Run `dist/main.js` with PM2 (requires `pm2` installed globally) |
+| `start:cluster` | Run 4 PM2 cluster instances |
+| `test` | Run Jest with coverage |
+| `mcp` | Start the MCP server from source |
+| `mcp:prod` | Start the MCP server from `dist/` |
+| `openapi:generate` | Generate client types from OpenAPI into `generated/` |
+| `generate-users`, `generate-tables`, `generate-fnb`, `generate-orders` | Seed sample data |
 
-This documentation covers the basic endpoints of the API. For more details on additional routes or implementation specifics, please refer to the project source code.
+## Docker
 
-## MCP Server
-
-The project also includes an MCP server for read-only access to the database through Claude Desktop or any MCP-compatible client.
-
-### Run in development
+Build from `apps/api`. The build context is the monorepo root:
 
 ```bash
-npm run mcp
+cd apps/api
+docker compose up --build app      # API, published on host port 3001
+docker compose up --build mcp      # MCP server
 ```
 
-### Run in Docker
+`docker-compose.yml` is for production-like runs. `docker-compose.dev.yml` mounts the monorepo for live reload and uses `Dockerfile.dev`. Both load variables from `apps/api/.env` through `env_file`.
 
-For a separate container attached to your MCP client, use `run --rm`:
+### Deployment
+
+The API runs on its own machine, in Docker. The web app calls it from the server (Vercel), so the API needs a public HTTPS URL, for example behind Caddy or nginx. `apps/api/.env` must exist on that machine. The image does not contain it, because `.dockerignore` excludes `.env`.
+
+The CORS allowlist in `src/app.ts` is hardcoded for local development. The browser never calls the API directly, so production only needs the web app's origin.
+
+## MCP server
+
+The MCP server gives read-only database access to MCP clients such as Claude Desktop:
 
 ```bash
-docker compose run --rm mcp
+pnpm --filter servemate-service mcp
 ```
 
-For the dev compose file:
+## Tests
 
 ```bash
-docker compose -f docker-compose.dev.yml run --rm mcp
+pnpm --filter servemate-service test
 ```
 
-### Available tools
+Jest config is in `jest.config.js`. Tests live under `src/tests`.
 
-- `api_catalog` - returns the full catalog of methods with their inputs and outputs.
+## Notes
+
+- Routes are under `/api`. Protected routes need `Authorization: Bearer <accessToken>`.
+- The refresh token is an HttpOnly cookie managed by the server.
+- Prisma dynamic `orderBy` fields must be validated against an allowlist before use. Do not pass raw sort names from requests into Prisma.
+- Read and write caching uses decorators in `src/decorators`. When you mutate data, invalidate the related cache.
