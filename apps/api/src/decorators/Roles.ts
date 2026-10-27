@@ -42,7 +42,8 @@ export const Roles = (roles: UserRole[]): MethodDecorator => {
     const route = routes.find(item => item.handlerName === propertyKey);
 
     if (route) {
-      route.middlewares = middlewares;
+      // Prepend instead of replacing: @Validate may already have pushed ValidateMiddleware onto this route.
+      route.middlewares = [new RoleMiddleware(roles), ...(route.middlewares ?? [])];
     }
 
     return descriptor;

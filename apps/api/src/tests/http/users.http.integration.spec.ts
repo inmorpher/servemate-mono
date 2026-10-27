@@ -192,4 +192,40 @@ describe('Users HTTP integration', () => {
     });
     expect(service.findUsers).not.toHaveBeenCalled();
   });
+
+  it('returns 422 for an invalid PUT body for an admin user before calling the service', async () => {
+    tokenService.verifyAccessToken.mockResolvedValue({
+      id: 1,
+      email: 'admin@example.com',
+      role: UserRole.ADMIN,
+    });
+
+    const response = await fetch(`${baseUrl}/api/users/7`, {
+      method: 'PUT',
+      headers: {
+        Authorization: 'Bearer test-token',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ name: '' }),
+    });
+
+    expect(response.status).toBe(422);
+    expect(service.updateUser).not.toHaveBeenCalled();
+  });
+
+  it('deletes a user by id for an admin user', async () => {
+    tokenService.verifyAccessToken.mockResolvedValue({
+      id: 1,
+      email: 'admin@example.com',
+      role: UserRole.ADMIN,
+    });
+
+    const response = await fetch(`${baseUrl}/api/users/7`, {
+      method: 'DELETE',
+      headers: { Authorization: 'Bearer test-token' },
+    });
+
+    expect(response.status).toBe(200);
+    expect(service.deleteUser).toHaveBeenCalledWith(7);
+  });
 });
