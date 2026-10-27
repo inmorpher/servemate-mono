@@ -10,9 +10,16 @@ const tokenServiceMock = (): jest.Mocked<ITokenService> =>
     revokeAccessToken: jest.fn(),
   }) as jest.Mocked<ITokenService>;
 
+const usersServiceMock = (dbUser: unknown = { id: 7, isActive: true }) => ({
+  findUserById: jest.fn().mockResolvedValue(dbUser),
+});
+
 describe('AuthMiddleware', () => {
   it('passes an error when the authorization header is missing', async () => {
-    const middleware = new AuthMiddleware(tokenServiceMock());
+    const middleware = new AuthMiddleware(
+      tokenServiceMock(),
+      usersServiceMock() as any
+    );
     const next = jest.fn();
 
     await middleware.execute({ headers: {} } as any, {} as any, next);
@@ -29,7 +36,7 @@ describe('AuthMiddleware', () => {
     'rejects an invalid authorization header: %s',
     async authorization => {
       const tokenService = tokenServiceMock();
-      const middleware = new AuthMiddleware(tokenService);
+      const middleware = new AuthMiddleware(tokenService, usersServiceMock() as any);
       const next = jest.fn();
 
       await middleware.execute(
@@ -52,7 +59,8 @@ describe('AuthMiddleware', () => {
     const tokenService = tokenServiceMock();
     const user = { id: 7, email: 'admin@example.com', role: 'ADMIN' };
     tokenService.verifyAccessToken.mockResolvedValue(user as any);
-    const middleware = new AuthMiddleware(tokenService);
+    const usersService = usersServiceMock();
+    const middleware = new AuthMiddleware(tokenService, usersService as any);
     const request = {
       headers: { authorization: 'Bearer access-token' },
     } as any;
@@ -68,7 +76,7 @@ describe('AuthMiddleware', () => {
   it('converts token verification failures to a 401 error', async () => {
     const tokenService = tokenServiceMock();
     tokenService.verifyAccessToken.mockRejectedValue(new Error('expired'));
-    const middleware = new AuthMiddleware(tokenService);
+    const middleware = new AuthMiddleware(tokenService, usersServiceMock() as any);
     const next = jest.fn();
 
     await middleware.execute(
@@ -77,6 +85,30 @@ describe('AuthMiddleware', () => {
       next
     );
 
+    expect(next).toHaveBeenCalledWith(
+      expect.objectContaining({ statusCode: 401, message: 'Invalid token' })
+    );
+  });
+
+  it.each([
+    ['missing', null],
+    ['inactive', { id: 7, isActive: false }],
+  ])('rejects a valid token when the user is %s', async (_label, dbUser) => {
+    const tokenService = tokenServiceMock();
+    tokenService.verifyAccessToken.mockResolvedValue({
+      id: 7,
+      email: 'admin@example.com',
+      role: 'ADMIN',
+    } as any);
+    const usersService = usersServiceMock(dbUser);
+    const middleware = new AuthMiddleware(tokenService, usersService as any);
+    const request = { headers: { authorization: 'Bearer access-token' } } as any;
+    const next = jest.fn();
+
+    await middleware.execute(request, {} as any, next);
+
+    expect(usersService.findUserById).toHaveBeenCalledWith(7);
+    expect(request.user).toBeUndefined();
     expect(next).toHaveBeenCalledWith(
       expect.objectContaining({ statusCode: 401, message: 'Invalid token' })
     );

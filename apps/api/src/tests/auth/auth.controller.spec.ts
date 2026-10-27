@@ -1,6 +1,19 @@
 import { AuthenticationController } from '../../auth/auth.controller';
 import { IAuthService } from '../../auth/auth.service.interface';
 
+jest.mock('../../../env', () => ({
+  ENV: {
+    PRODUCTION: false,
+    PORT: 3001,
+    DATABASE_URL: 'postgresql://test',
+    JWT_SECRET: 'a'.repeat(32),
+    JWT_REFRESH: 'b'.repeat(32),
+    JWT_EXPIRES_IN: '1h',
+    JWT_REFRESH_EXPIRES_IN: '7d',
+    LOG_TO_FILE: false,
+  },
+}));
+
 const serviceMock = (): jest.Mocked<IAuthService> =>
   ({
     login: jest.fn(),

@@ -116,6 +116,7 @@ export class PaymentsController extends BaseController {
   }
 
   @Validate(PaymentParamsSchema, 'params')
+  @Roles([UserRole.ADMIN, UserRole.MANAGER, UserRole.HOST])
   @Post('/complete/:id')
   async complete(
     req: TypedRequest<PaymentParamsDto, {}, {}>,
@@ -157,6 +158,7 @@ export class PaymentsController extends BaseController {
   }
 
   @Validate(PaymentParamsSchema, 'params')
+  @Roles([UserRole.ADMIN, UserRole.MANAGER, UserRole.HOST])
   @Post('/cancel/:id')
   async cancel(
     req: TypedRequest<PaymentParamsDto, {}, {}>,

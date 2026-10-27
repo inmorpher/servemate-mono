@@ -4,12 +4,14 @@ import 'reflect-metadata';
 import { IMiddleware } from '../common/middleware.interface';
 import { HTTPError } from '../errors/http-error.class';
 import { TYPES } from '../types';
+import { IUsersService } from '../users/users.service.interface';
 import { ITokenService } from './token.service.interface';
 
 @injectable()
 export class AuthMiddleware implements IMiddleware {
   constructor(
-    @inject(TYPES.ITokenService) private tokenService: ITokenService
+    @inject(TYPES.ITokenService) private tokenService: ITokenService,
+    @inject(TYPES.UsersService) private usersService: IUsersService
   ) {}
 
   async execute(
@@ -31,11 +33,23 @@ export class AuthMiddleware implements IMiddleware {
       );
     }
 
+    let payload;
     try {
-      req.user = await this.tokenService.verifyAccessToken(token);
-      return next();
+      payload = await this.tokenService.verifyAccessToken(token);
     } catch (error) {
       return next(new HTTPError(401, 'Token', 'Invalid token'));
     }
+
+    try {
+      const user = await this.usersService.findUserById(payload.id);
+      if (!user || !user.isActive) {
+        return next(new HTTPError(401, 'Token', 'Invalid token'));
+      }
+    } catch (error) {
+      return next(new HTTPError(401, 'Token', 'Invalid token'));
+    }
+
+    req.user = payload;
+    return next();
   }
 }

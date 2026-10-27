@@ -69,6 +69,7 @@ describe('Users HTTP integration', () => {
   let baseUrl: string;
   let service: jest.Mocked<UserControllerService>;
   let tokenService: jest.Mocked<ITokenService>;
+  let usersService: { findUserById: jest.Mock };
 
   beforeAll(async () => {
     app = express();
@@ -77,14 +78,12 @@ describe('Users HTTP integration', () => {
 
     service = serviceMock();
     tokenService = tokenServiceMock();
-    const authMiddleware = new AuthMiddleware(tokenService);
+    usersService = { findUserById: jest.fn() };
+    const authMiddleware = new AuthMiddleware(tokenService, usersService as any);
     const controller = new UserController(logger as any, service);
     const exceptionFilter = new ExceptionFilter(logger as any);
 
-    app.use('/api', (req, res, next) => {
-      if (req.path.includes('/meta')) return next();
-      return authMiddleware.execute(req, res, next);
-    });
+    app.use('/api', (req, res, next) => authMiddleware.execute(req, res, next));
     registerController(app, controller);
     app.use(exceptionFilter.catch.bind(exceptionFilter));
 
@@ -105,6 +104,7 @@ describe('Users HTTP integration', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    usersService.findUserById.mockResolvedValue({ id: 1, isActive: true });
     service.findUsers.mockResolvedValue({ users: [], total: 0 } as any);
     service.getMeta.mockResolvedValue({
       roles: Object.values(UserRole),
@@ -116,20 +116,11 @@ describe('Users HTTP integration', () => {
     });
   });
 
-  it('serves users metadata publicly before the dynamic ID route', async () => {
+  it('requires authentication for users metadata', async () => {
     const response = await fetch(`${baseUrl}/api/users/meta`);
 
-    expect(response.status).toBe(200);
-    await expect(response.json()).resolves.toEqual({
-      roles: Object.values(UserRole),
-      activeStates: [true, false],
-      createdAtRange: {
-        min: '2026-01-01T00:00:00.000Z',
-        max: '2026-01-01T00:00:00.000Z',
-      },
-    });
-    expect(tokenService.verifyAccessToken).not.toHaveBeenCalled();
-    expect(service.getMeta).toHaveBeenCalledTimes(1);
+    expect(response.status).toBe(401);
+    expect(service.getMeta).not.toHaveBeenCalled();
   });
 
   it('returns 401 through the HTTP error pipeline without a token', async () => {
@@ -200,5 +191,41 @@ describe('Users HTTP integration', () => {
       error: 'Validation Error',
     });
     expect(service.findUsers).not.toHaveBeenCalled();
+  });
+
+  it('returns 422 for an invalid PUT body for an admin user before calling the service', async () => {
+    tokenService.verifyAccessToken.mockResolvedValue({
+      id: 1,
+      email: 'admin@example.com',
+      role: UserRole.ADMIN,
+    });
+
+    const response = await fetch(`${baseUrl}/api/users/7`, {
+      method: 'PUT',
+      headers: {
+        Authorization: 'Bearer test-token',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ name: '' }),
+    });
+
+    expect(response.status).toBe(422);
+    expect(service.updateUser).not.toHaveBeenCalled();
+  });
+
+  it('deletes a user by id for an admin user', async () => {
+    tokenService.verifyAccessToken.mockResolvedValue({
+      id: 1,
+      email: 'admin@example.com',
+      role: UserRole.ADMIN,
+    });
+
+    const response = await fetch(`${baseUrl}/api/users/7`, {
+      method: 'DELETE',
+      headers: { Authorization: 'Bearer test-token' },
+    });
+
+    expect(response.status).toBe(200);
+    expect(service.deleteUser).toHaveBeenCalledWith(7);
   });
 });

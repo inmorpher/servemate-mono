@@ -44,6 +44,5 @@ Registration steps for a new module:
 - `main.ts` is the composition root. A container module that is not loaded there is not wired. Check startup logs after adding a module.
 - Prisma schema is split across `prisma/models/`, `prisma/enums.prisma`, and `prisma/generators/`. Edit the right file.
 - `env.ts` requires `PRODUCTION`, `LOG_TO_FILE`, and the `JWT_*` variables. Missing values stop startup.
-- `TOKEN_CACHE_TTL` is in milliseconds.
 - CORS allowlist is in `src/app.ts`. Update it when the web origin changes.
 - The MCP server (`src/mcp/server.ts`) is a separate entrypoint, started with `pnpm mcp`.

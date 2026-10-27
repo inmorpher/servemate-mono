@@ -64,6 +64,7 @@ export class ReservationsController extends BaseController {
   }
 
   @Validate(ReservationCreateSchema, 'body')
+  @Roles([UserRole.ADMIN, UserRole.MANAGER, UserRole.HOST])
   @Post('/')
   async create(
     req: TypedRequest<{}, {}, ReservationCreateDto>,
@@ -136,6 +137,7 @@ export class ReservationsController extends BaseController {
 
   @Validate(ReservationUpdateSchema, 'body')
   @Validate(ReservationParamsSchema, 'params')
+  @Roles([UserRole.ADMIN, UserRole.MANAGER, UserRole.HOST])
   @Put('/:id')
   async update(
     req: TypedRequest<ReservationParamsDto, {}, ReservationUpdateDto>,
@@ -157,6 +159,7 @@ export class ReservationsController extends BaseController {
 
   @Validate(ReservationStatusSchema, 'body')
   @Validate(ReservationParamsSchema, 'params')
+  @Roles([UserRole.ADMIN, UserRole.MANAGER, UserRole.HOST])
   @Patch('/:id/status')
   async updateStatus(
     req: TypedRequest<ReservationParamsDto, {}, ReservationStatusDto>,
@@ -178,6 +181,7 @@ export class ReservationsController extends BaseController {
 
   @Validate(ReservationTimeSchema, 'body')
   @Validate(ReservationParamsSchema, 'params')
+  @Roles([UserRole.ADMIN, UserRole.MANAGER, UserRole.HOST])
   @Patch('/:id/time')
   async updateTime(
     req: TypedRequest<ReservationParamsDto, {}, ReservationTimeDto>,
@@ -199,6 +203,7 @@ export class ReservationsController extends BaseController {
 
   @Validate(ReservationTablesSchema, 'body')
   @Validate(ReservationParamsSchema, 'params')
+  @Roles([UserRole.ADMIN, UserRole.MANAGER, UserRole.HOST])
   @Patch('/:id/tables')
   async updateTables(
     req: TypedRequest<ReservationParamsDto, {}, ReservationTablesDto>,
@@ -220,6 +225,7 @@ export class ReservationsController extends BaseController {
 
   @Validate(ReservationGuestInfoSchema, 'body')
   @Validate(ReservationParamsSchema, 'params')
+  @Roles([UserRole.ADMIN, UserRole.MANAGER, UserRole.HOST])
   @Patch('/:id/guest-info')
   async updateGuestInfo(
     req: TypedRequest<ReservationParamsDto, {}, ReservationGuestInfoDto>,
@@ -241,6 +247,7 @@ export class ReservationsController extends BaseController {
 
   @Validate(ReservationParamsSchema, 'params')
   @Validate(ReservationCommentSchema, 'body')
+  @Roles([UserRole.ADMIN, UserRole.MANAGER, UserRole.HOST])
   @Patch('/:id/comment')
   async updateComment(
     req: TypedRequest<ReservationParamsDto, {}, { comments: string }>,

@@ -125,6 +125,9 @@ export class AuthenticationController extends BaseController {
       }
 
       const user = await this.authService.me(userId);
+      if (!user) {
+        return this.unauthorized(res, ERROR_MESSAGES.NOT_AUTHENTICATED);
+      }
       this.ok(res, { user });
     } catch (error) {
       this.loggerService.error(
