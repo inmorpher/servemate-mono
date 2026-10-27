@@ -44,10 +44,9 @@ Create `apps/api/.env`. Do not commit real secrets.
 | `DATABASE_URL` | PostgreSQL connection string |
 | `PORT` | HTTP port. Defaults to `3000`. Locally use `3001`, because the web app runs on `3000`. |
 | `LOG_TO_FILE` | `true` to write logs to a file |
-| `TOKEN_CACHE_TTL` | Token cache TTL in **milliseconds**. Default `3600000` |
 | `JWT_SECRET` | Secret for access tokens |
 | `JWT_REFRESH` | Secret for refresh tokens |
-| `JWT_EXPIRES_IN` | Access token lifetime, for example `15m` |
+| `JWT_EXPIRES_IN` | Access token lifetime, for example `10m` |
 | `JWT_REFRESH_EXPIRES_IN` | Refresh token lifetime, for example `7d` |
 
 If you change `PORT`, update `API_URL` and `NEXT_PUBLIC_API_URL` in `apps/web/.env` to match.
