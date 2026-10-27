@@ -1,6 +1,8 @@
 import { NextFunction, Response } from 'express';
 import { inject, injectable } from 'inversify';
 import 'reflect-metadata';
+import { UserRole } from '@prisma/client';
+import { Roles } from '../decorators/Roles';
 import { BaseController } from '../common/base.controller';
 import { TypedRequest } from '../common/route.interface';
 import {
@@ -47,6 +49,7 @@ export class FoodItemsController extends BaseController {
   }
 
   @Validate(createFoodItemSchema, 'body')
+  @Roles([UserRole.ADMIN, UserRole.MANAGER])
   @Post('/')
   async create(
     req: TypedRequest<{}, {}, CreateFoodItemDTO>,
@@ -117,6 +120,7 @@ export class FoodItemsController extends BaseController {
 
   @Validate(updateFoodItemSchema, 'body')
   @Validate(FoodItemParamsSchema, 'params')
+  @Roles([UserRole.ADMIN, UserRole.MANAGER])
   @Patch('/:id')
   async update(
     req: TypedRequest<FoodItemParamsDto, {}, UpdateFoodItemDTO>,
@@ -137,6 +141,7 @@ export class FoodItemsController extends BaseController {
   }
 
   @Validate(FoodItemParamsSchema, 'params')
+  @Roles([UserRole.ADMIN, UserRole.MANAGER])
   @Delete('/:id')
   async delete(
     req: TypedRequest<FoodItemParamsDto, {}, {}>,

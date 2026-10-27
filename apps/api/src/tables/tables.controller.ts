@@ -122,6 +122,7 @@ export class TablesController extends BaseController {
   }
 
   @Validate(TableCreateSchema, 'body')
+  @Roles([UserRole.ADMIN, UserRole.MANAGER])
   @Post('/')
   async create(
     req: TypedRequest<{}, {}, TableCreateDto>,
@@ -140,6 +141,7 @@ export class TablesController extends BaseController {
 
   @Validate(TableUpdateSchema, 'body')
   @Validate(TableParamsSchema, 'params')
+  @Roles([UserRole.ADMIN, UserRole.MANAGER])
   @Put('/:id')
   async update(
     req: TypedRequest<TableParamsDto, {}, TableUpdateDto>,
@@ -159,6 +161,7 @@ export class TablesController extends BaseController {
   }
 
   @Validate(TableParamsSchema, 'params')
+  @Roles([UserRole.ADMIN, UserRole.MANAGER])
   @Delete('/:id')
   async delete(
     req: TypedRequest<TableParamsDto, {}, {}>,

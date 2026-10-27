@@ -8,6 +8,8 @@ import { UserEntity, UserSchema } from './user-base.dto';
 export const UserLoginSchema = UserSchema.pick({
     email: true,
     password: true,
+}).extend({
+    password: z.string().min(1, { message: 'Password must not be empty' }),
 });
 
 /**

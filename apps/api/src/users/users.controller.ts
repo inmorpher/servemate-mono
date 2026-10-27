@@ -127,6 +127,10 @@ export class UserController extends BaseController implements IUsersController {
     next: NextFunction
   ) {
     const user = this.getValidated(req, 'body');
+    if (user.role === UserRole.ADMIN && req.user?.role !== UserRole.ADMIN) {
+      this.forbidden(res, 'Only admins can create admin users');
+      return;
+    }
     try {
       const newUser = await this.userService.createUser(user);
 
@@ -154,7 +158,6 @@ export class UserController extends BaseController implements IUsersController {
   @Roles([UserRole.ADMIN, UserRole.MANAGER])
   @Validate(UserParamsSchema, 'params')
   @Delete('/:id')
-  @Roles([UserRole.ADMIN, UserRole.MANAGER])
   async delete(
     req: TypedRequest<UserParamsDto, {}, {}>,
     res: Response,
@@ -162,6 +165,13 @@ export class UserController extends BaseController implements IUsersController {
   ) {
     const user = this.getValidated(req, 'params').id;
     try {
+      if (req.user?.role !== UserRole.ADMIN) {
+        const target = await this.userService.findUserById(user);
+        if (target?.role === UserRole.ADMIN) {
+          this.forbidden(res, 'Only admins can delete admin users');
+          return;
+        }
+      }
       await this.userService.deleteUser(user);
       this.ok(res, { message: `User with ID ${user} deleted successfully` });
     } catch (error) {
@@ -194,6 +204,16 @@ export class UserController extends BaseController implements IUsersController {
     const user = this.getValidated(req, 'params').id;
     const payload = this.getValidated(req, 'body');
     try {
+      if (req.user?.role !== UserRole.ADMIN) {
+        const target = await this.userService.findUserById(user);
+        if (
+          payload.role === UserRole.ADMIN ||
+          target?.role === UserRole.ADMIN
+        ) {
+          this.forbidden(res, 'Only admins can manage admin users');
+          return;
+        }
+      }
       await this.userService.updateUser(user, payload);
 
       this.ok(res, { message: `User with ID ${user} updated successfully` });

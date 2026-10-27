@@ -54,6 +54,21 @@ export class AuthRepository implements IAuthRepository {
     });
   }
 
+  async revokeIfActive(jti: string, revokedAt: Date): Promise<boolean> {
+    const result = await this.prisma.session.updateMany({
+      where: { refreshJti: jti, revokedAt: null },
+      data: { revokedAt },
+    });
+    return result.count === 1;
+  }
+
+  async revokeAllByUser(userId: number): Promise<void> {
+    await this.prisma.session.updateMany({
+      where: { userId, revokedAt: null },
+      data: { revokedAt: new Date() },
+    });
+  }
+
   private toEntity(raw: PrismaSession): Session {
     return new Session(
       raw.id,

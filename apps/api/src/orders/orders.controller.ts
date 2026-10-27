@@ -1,6 +1,8 @@
 import { NextFunction, Response } from 'express';
 import { inject, injectable } from 'inversify';
 import 'reflect-metadata';
+import { UserRole } from '@prisma/client';
+import { Roles } from '../decorators/Roles';
 import z from 'zod';
 import { BaseController } from '../common/base.controller';
 import { TypedRequest } from '../common/route.interface';
@@ -186,6 +188,7 @@ export class OrdersController extends BaseController {
   }
 
   @Validate(OrderIdSchema, 'params')
+  @Roles([UserRole.ADMIN, UserRole.MANAGER])
   @Delete('/:id')
   async deleteOrder(
     req: TypedRequest<OrderIdParams, {}, {}>,

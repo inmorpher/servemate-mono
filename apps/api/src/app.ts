@@ -2,6 +2,8 @@ import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express, { Express, json, Router, urlencoded } from 'express';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import { Server } from 'http';
 import { inject, injectable } from 'inversify';
 import 'reflect-metadata';
@@ -73,6 +75,7 @@ export class App {
   }
 
   private useMiddlewares(): void {
+    this.app.use(helmet({ contentSecurityPolicy: false }));
     this.app.use(compression());
     this.app.use(json());
     this.app.use(urlencoded({ extended: true }));
@@ -109,6 +112,29 @@ export class App {
 
     this.app.use(cookieParser());
 
+    const authRateLimitWindow = {
+      windowMs: 15 * 60 * 1000,
+      standardHeaders: 'draft-7' as const,
+      legacyHeaders: false,
+    };
+    this.app.use(
+      '/api/auth/login',
+      rateLimit({
+        ...authRateLimitWindow,
+        limit: 10,
+        skipSuccessfulRequests: true,
+        message: { statusCode: 429, message: 'Too many login attempts' },
+      })
+    );
+    this.app.use(
+      '/api/auth/refresh-token',
+      rateLimit({
+        ...authRateLimitWindow,
+        limit: 100,
+        message: { statusCode: 429, message: 'Too many refresh requests' },
+      })
+    );
+
     this.app.use('/api', (req, res, next) => {
       if (req.method === 'OPTIONS') {
         return next();
@@ -117,7 +143,7 @@ export class App {
       if (
         req.path.startsWith('/auth/login') ||
         req.path.startsWith('/auth/refresh-token') ||
-        req.path.includes('/meta')
+        req.path.startsWith('/auth/logout')
       ) {
         return next();
       }

@@ -11,9 +11,15 @@ const prismaMock = () => ({
     update: jest.fn(),
     delete: jest.fn(),
   },
+  session: {
+    deleteMany: jest.fn(),
+  },
   order: {
     count: jest.fn(),
   },
+  $transaction: jest.fn((operations: Promise<unknown>[]) =>
+    Promise.all(operations)
+  ),
 });
 
 const selectedUser = {
@@ -115,7 +121,11 @@ describe('UsersRepository', () => {
       where: { id: 7 },
       data: { isActive: false },
     });
+    expect(prisma.session.deleteMany).toHaveBeenCalledWith({
+      where: { userId: 7 },
+    });
     expect(prisma.user.delete).toHaveBeenCalledWith({ where: { id: 7 } });
+    expect(prisma.$transaction).toHaveBeenCalledTimes(1);
   });
 
   it('counts active orders and verifies credentials', async () => {
@@ -130,7 +140,7 @@ describe('UsersRepository', () => {
     await expect(repository.countActiveOrdersByServer(7)).resolves.toBe(3);
     await expect(
       repository.verifyCredentials('alice@example.com', 'secret123')
-    ).rejects.toThrow('Invalid password');
+    ).resolves.toBeNull();
     expect(prisma.order.count).toHaveBeenCalledWith({ where: { serverId: 7 } });
   });
 });

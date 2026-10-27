@@ -15,18 +15,15 @@ type RefreshTokenPayload = {
   jti: string;
 };
 
+const JWT_ALGORITHM = 'HS256' as const;
+
 @injectable()
 export class TokenService implements ITokenService {
-  private tokenCache: NodeCache;
+  // Holds revoked access tokens until their own `exp`, so logout takes effect immediately.
   private revokedTokens: NodeCache;
 
   constructor() {
-    const ttlSeconds = Math.max(
-      1,
-      Math.floor(Number(process.env.TOKEN_CACHE_TTL) / 1000)
-    );
-    this.tokenCache = new NodeCache({ stdTTL: ttlSeconds });
-    this.revokedTokens = new NodeCache({ stdTTL: ttlSeconds });
+    this.revokedTokens = new NodeCache({ useClones: false });
   }
 
   async verifyRefreshToken(
@@ -51,8 +48,10 @@ export class TokenService implements ITokenService {
   }
 
   revokeAccessToken(token: string): void {
-    this.revokedTokens.set(token, true, this.getTokenTtlSeconds(token));
-    this.tokenCache.del(token);
+    const ttl = this.getTokenTtlSeconds(token);
+    if (ttl > 0) {
+      this.revokedTokens.set(token, true, ttl);
+    }
   }
 
   async verifyAccessToken(token: string): Promise<DecodedUser> {
@@ -60,29 +59,7 @@ export class TokenService implements ITokenService {
       throw new Error('Token has been revoked');
     }
 
-    const cached = this.tokenCache.get<DecodedUser>(token);
-    if (cached) {
-      return cached;
-    }
-    const decoded = jwt.decode(token) as { exp?: number } | null;
-
-    if (decoded?.exp && decoded.exp * 1000 < Date.now()) {
-      throw new jwt.TokenExpiredError(
-        'Token has expired',
-        new Date(decoded.exp * 1000)
-      );
-    }
-
-    return new Promise((resolve, reject) => {
-      jwt.verify(token, ENV.JWT_SECRET, (err, decoded) => {
-        if (err) {
-          return reject(err);
-        } else {
-          this.tokenCache.set(token, decoded as DecodedUser);
-          resolve(decoded as DecodedUser);
-        }
-      });
-    });
+    return this.verifyToken<DecodedUser>(token, ENV.JWT_SECRET);
   }
 
   private async generateToken(
@@ -128,7 +105,7 @@ export class TokenService implements ITokenService {
 
   private async verifyToken<T>(token: string, secret: string): Promise<T> {
     return new Promise((resolve, reject) => {
-      jwt.verify(token, secret, (err, decoded) => {
+      jwt.verify(token, secret, { algorithms: [JWT_ALGORITHM] }, (err, decoded) => {
         if (err) {
           reject(err);
         } else {
@@ -144,13 +121,10 @@ export class TokenService implements ITokenService {
 
   private getTokenTtlSeconds(token: string): number {
     const decoded = jwt.decode(token) as { exp?: number } | null;
-    if (decoded?.exp) {
-      return Math.max(1, Math.ceil(decoded.exp * 1000 - Date.now()) / 1000);
+    if (!decoded?.exp) {
+      return 0;
     }
-
-    return Math.max(
-      1,
-      Math.ceil(parseExpiresIn(ENV.TOKEN_CACHE_TTL, true) / 1000)
-    );
+    return Math.max(0, Math.ceil(decoded.exp - Date.now() / 1000));
   }
 }
+

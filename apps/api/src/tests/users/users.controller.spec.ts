@@ -96,7 +96,10 @@ describe('UserController', () => {
     const response = responseMock();
 
     await controller.create(
-      { validated: { body: payload } } as any,
+      {
+        validated: { body: payload },
+        user: { role: UserRole.ADMIN },
+      } as any,
       response,
       next
     );
@@ -106,6 +109,28 @@ describe('UserController', () => {
       'User ALICE alice@example.com created successfully'
     );
     expect(response.json).toHaveBeenCalledWith(created);
+  });
+
+  it('forbids a non-admin actor from creating an admin user', async () => {
+    const payload = {
+      name: 'Bob',
+      email: 'bob@example.com',
+      role: UserRole.ADMIN,
+      password: 'secret123',
+    };
+    const response = responseMock();
+
+    await controller.create(
+      {
+        validated: { body: payload },
+        user: { role: UserRole.MANAGER },
+      } as any,
+      response,
+      next
+    );
+
+    expect(response.status).toHaveBeenCalledWith(403);
+    expect(service.createUser).not.toHaveBeenCalled();
   });
 
   it('forwards update and delete requests to the service', async () => {

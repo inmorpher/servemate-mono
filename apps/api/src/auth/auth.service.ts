@@ -35,7 +35,7 @@ export class AuthService extends BaseService implements IAuthService {
       const user = await this.usersService.validateCredentials(credentials);
 
       if (!user) {
-        this.logger.warn('Failed login attempt for user: ' + credentials.email);
+        this.logger.warn('Failed login attempt');
         throw new HTTPError(401, this.serviceName, 'Invalid credentials');
       }
 
@@ -99,17 +99,31 @@ export class AuthService extends BaseService implements IAuthService {
       const { jti } = await this.tokenService.verifyRefreshToken(refreshToken);
       const session = await this.authRepository.findByJti(jti);
 
-      if (!session?.isActive()) {
+      if (!session) {
+        throw new HTTPError(401, this.serviceName, 'Invalid refresh token');
+      }
+
+      if (session.isRevoked()) {
+        // A revoked refresh token was presented again: treat it as theft and end every session of that user.
+        await this.authRepository.revokeAllByUser(session.userId);
+        throw new HTTPError(401, this.serviceName, 'Invalid refresh token');
+      }
+
+      if (!session.isActive()) {
         throw new HTTPError(401, this.serviceName, 'Invalid refresh token');
       }
 
       const user = await this.usersService.findUserById(session.userId);
-      if (!user) {
+      if (!user || !user.isActive) {
         throw new HTTPError(401, this.serviceName, 'User not found');
       }
 
-      session.revoke();
-      await this.authRepository.save(session);
+      const claimed = await this.authRepository.revokeIfActive(jti, new Date());
+      if (!claimed) {
+        // Lost a race with a concurrent refresh using the same token.
+        await this.authRepository.revokeAllByUser(session.userId);
+        throw new HTTPError(401, this.serviceName, 'Invalid refresh token');
+      }
 
       const [access, refresh] = await Promise.all([
         this.tokenService.generateAccessToken(user),
@@ -139,7 +153,7 @@ export class AuthService extends BaseService implements IAuthService {
   async me(userId: number): Promise<AuthenticatedUser | null> {
     try {
       const user = await this.usersService.findUserById(userId);
-      return user ? (user as AuthenticatedUser) : null;
+      return user && user.isActive ? (user as AuthenticatedUser) : null;
     } catch (error) {
       throw this.handleError(error);
     }

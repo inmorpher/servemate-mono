@@ -4,6 +4,11 @@ import { inject, injectable } from 'inversify';
 import 'reflect-metadata';
 import { TYPES } from '../types';
 import { UserFilters, UserListItem, UserMetaDto, UserSortColumn } from '@servemate/shared-dto';
+
+// bcrypt hash of a throwaway string; compared when the email is unknown so timing matches a real check.
+const DUMMY_PASSWORD_HASH =
+  '$2b$10$DTYAgzZP1wNaqjcVZl3ByugQigXrNJ8hKZo5JPg/qvhrP8.8EIZUW';
+
 export type UserPagination = {
   page: number;
   pageSize: number;
@@ -143,9 +148,11 @@ export class UsersRepository {
   }
 
   async delete(id: number) {
-    return this.prisma.user.delete({
-      where: { id },
-    });
+    const [, user] = await this.prisma.$transaction([
+      this.prisma.session.deleteMany({ where: { userId: id } }),
+      this.prisma.user.delete({ where: { id } }),
+    ]);
+    return user;
   }
 
   async countActiveOrdersByServer(serverId: number): Promise<number> {
@@ -157,7 +164,7 @@ export class UsersRepository {
   async verifyCredentials(
     email: string,
     password: string
-  ): Promise<UserListItem> {
+  ): Promise<UserListItem | null> {
     const user = await this.prisma.user.findUnique({
       where: { email },
       select: {
@@ -173,15 +180,13 @@ export class UsersRepository {
       },
     });
 
-    if (!user) {
-      throw new Error('User not found');
+    // Always run bcrypt so response timing does not reveal whether the email exists.
+    const isMatch = await compare(password, user?.password ?? DUMMY_PASSWORD_HASH);
+
+    if (!user || !user.isActive || !isMatch) {
+      return null;
     }
 
-    const isMatch = await compare(password, user.password);
-
-    if (!isMatch) {
-      throw new Error('Invalid password');
-    }
     const { password: _, ...safeUser } = user;
     return { ...safeUser, role: user.role as UserRole };
   }

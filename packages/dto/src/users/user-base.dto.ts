@@ -20,7 +20,8 @@ export const UserSchema = z.object({
   isActive: z.boolean().default(true),
   password: z
     .string()
-    .min(6, { message: 'Password must be at least 6 characters long' }),
+    .min(8, { message: 'Password must be at least 8 characters long' })
+    .max(72, { message: 'Password must be at most 72 characters long' }),
   createdAt: z.date().default(() => new Date()),
   updatedAt: z.date().default(() => new Date()),
   lastLogin: z.date().optional().nullable(),
