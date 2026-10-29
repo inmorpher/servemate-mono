@@ -1,6 +1,10 @@
-import { OrderState } from '../enums';
+import { DiscountType, OrderState } from '../enums';
 import z from 'zod';
-import { CreateGuestItemsSchema } from './order-item.dto';
+import {
+  CreateGuestItemsSchema,
+  DISCOUNT_RANGE_MESSAGE,
+  isValidDiscount,
+} from './order-item.dto';
 
 export const OrderUpdateSchema = z
   .object({
@@ -9,12 +13,20 @@ export const OrderUpdateSchema = z
     status: z.enum(OrderState).optional(),
     comments: z.string().nullable().optional(),
     discount: z.coerce.number().nonnegative().optional(),
+    discountType: z.enum(DiscountType).optional(),
     tip: z.coerce.number().nonnegative().optional(),
   })
   .refine(data => Object.keys(data).length > 0, {
     message: 'At least one field must be provided for update.',
     path: ['body'],
-  });
+  })
+  .refine(
+    data =>
+      data.discount === undefined ||
+      data.discountType === undefined ||
+      isValidDiscount(data.discount, data.discountType),
+    { message: DISCOUNT_RANGE_MESSAGE, path: ['discount'] }
+  );
 
 export type OrderUpdate = z.infer<typeof OrderUpdateSchema>;
 

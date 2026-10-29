@@ -2,7 +2,7 @@
 
 import { ActionMenu } from '@/shared/components/action-menu/ActionMenu';
 import { Table } from '@/shared/components/table';
-import { OrderQuery, OrderSearchResultDto, OrderSortOptions } from '@servemate/shared-dto';
+import { DiscountType, OrderQuery, OrderSearchResultDto, OrderSortOptions } from '@servemate/shared-dto';
 import { Pencil, Phone, Printer, Trash2 } from 'lucide-react';
 import { useCallback } from 'react';
 import { useCallOrderItems } from '../hooks/useCallOrderItems';
@@ -132,7 +132,10 @@ export const OrderList = ({
 									data-active={isActiveColumn(OrderSortOptions.TOTAL_AMOUNT)}
 								>
 									{formatCurrency(order.totalAmount)} |{' '}
-									{formatCurrency(order.tip)} | {formatCurrency(order.discount)}
+									{formatCurrency(order.tip)} |{' '}
+									{order.discountType === DiscountType.AMOUNT
+										? formatCurrency(order.discount)
+										: `${order.discount}%`}
 								</Table.Cell>
 								<Table.Cell
 									className='text-monospace text-ctp-subtext0'

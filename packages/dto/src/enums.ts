@@ -11,6 +11,12 @@ export const ReservationStatus = {
 } as const;
 export type ReservationStatus = (typeof ReservationStatus)[keyof typeof ReservationStatus];
 
+export const DiscountType = {
+  PERCENT: 'PERCENT',
+  AMOUNT: 'AMOUNT',
+} as const;
+export type DiscountType = (typeof DiscountType)[keyof typeof DiscountType];
+
 export const UserRole = {
   ADMIN: 'ADMIN',
   USER: 'USER',

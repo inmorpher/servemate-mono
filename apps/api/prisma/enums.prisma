@@ -11,6 +11,11 @@ enum ReservationStatus {
   NO_SHOW
 }
 
+enum DiscountType {
+  PERCENT
+  AMOUNT
+}
+
 enum UserRole {
   ADMIN
   USER

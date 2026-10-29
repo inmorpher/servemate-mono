@@ -9,6 +9,7 @@ model Order {
   comments       String?
   completionTime DateTime?
   discount       Float               @default(0)
+  discountType   DiscountType        @default(PERCENT)
   tip            Float               @default(0)
   shiftId        String?
   id             Int                 @id @default(autoincrement())
@@ -35,6 +36,7 @@ model OrderFoodItem {
   orderId        Int
   itemId         Int
   discount       Float                  @default(0)
+  discountType   DiscountType           @default(PERCENT)
   finalPrice     Float
   fired          Boolean                @default(false)
   printed        Boolean                @default(false)
@@ -54,6 +56,7 @@ model OrderDrinkItem {
   orderId        Int
   itemId         Int
   discount       Float                  @default(0)
+  discountType   DiscountType           @default(PERCENT)
   finalPrice     Float
   fired          Boolean                @default(false)
   printed        Boolean                @default(false)

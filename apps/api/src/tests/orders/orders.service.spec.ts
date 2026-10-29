@@ -1,6 +1,7 @@
 import { Allergy, OrderState, PaymentState } from '@prisma/client';
 import { HTTPError } from '../../errors/http-error.class';
 import {
+  DiscountType,
   OrderCreate,
   OrderResponseDto,
   OrderUpdateItems,
@@ -13,6 +14,7 @@ const repositoryMock = (): jest.Mocked<IOrdersRepository> =>
     findOrders: jest.fn(),
     findById: jest.fn(),
     getMeta: jest.fn(),
+    findCatalogPrices: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
     updateItems: jest.fn(),
@@ -35,6 +37,7 @@ const responseOrder = (
   completionTime: null,
   totalAmount: 18,
   discount: 10,
+  discountType: DiscountType.PERCENT,
   tip: 0,
   shiftId: null,
   allergies: [],
@@ -50,6 +53,7 @@ const responseOrder = (
           allergies: [Allergy.GLUTEN],
           price: 10,
           discount: 0,
+          discountType: DiscountType.PERCENT,
           finalPrice: 10,
           printed: false,
           fired: false,
@@ -73,7 +77,7 @@ describe('OrdersService', () => {
     service = new OrdersService(repository);
   });
 
-  it('creates an order with flattened items and discounted total', async () => {
+  it('prices items from the catalog and computes the discounted total', async () => {
     const data: OrderCreate = {
       tableNumber: 43,
       guestsCount: 2,
@@ -81,6 +85,7 @@ describe('OrdersService', () => {
       status: OrderState.RECEIVED,
       comments: null,
       discount: 10,
+      discountType: DiscountType.PERCENT,
       allergies: [],
       foodItems: [
         {
@@ -88,22 +93,39 @@ describe('OrdersService', () => {
           items: [
             {
               itemId: 100,
-              price: 20,
               discount: 0,
-              finalPrice: 20,
+              discountType: DiscountType.PERCENT,
               specialRequest: null,
               allergies: [],
             },
           ],
         },
       ],
-      drinkItems: [],
+      drinkItems: [
+        {
+          guestNumber: 1,
+          items: [
+            {
+              itemId: 200,
+              discount: 50,
+              discountType: DiscountType.PERCENT,
+              specialRequest: null,
+              allergies: [],
+            },
+          ],
+        },
+      ],
     };
-    const created = responseOrder({ totalAmount: 18 });
+    repository.findCatalogPrices.mockResolvedValue({
+      foodPrices: new Map([[100, 20]]),
+      drinkPrices: new Map([[200, 8]]),
+    });
+    const created = responseOrder({ totalAmount: 21.6 });
     repository.create.mockResolvedValue(created);
 
     await expect(service.createOrder(data)).resolves.toBe(created);
 
+    expect(repository.findCatalogPrices).toHaveBeenCalledWith([100], [200]);
     expect(repository.create).toHaveBeenCalledWith({
       tableNumber: 43,
       guestsCount: 2,
@@ -111,20 +133,175 @@ describe('OrdersService', () => {
       status: OrderState.RECEIVED,
       comments: null,
       discount: 10,
-      totalAmount: 18,
+      discountType: DiscountType.PERCENT,
+      totalAmount: 21.6,
       foodItems: [
         {
           itemId: 100,
           price: 20,
           discount: 0,
+          discountType: DiscountType.PERCENT,
           finalPrice: 20,
           specialRequest: null,
           allergies: [],
           guestNumber: 2,
         },
       ],
+      drinkItems: [
+        {
+          itemId: 200,
+          price: 8,
+          discount: 50,
+          discountType: DiscountType.PERCENT,
+          finalPrice: 4,
+          specialRequest: null,
+          allergies: [],
+          guestNumber: 1,
+        },
+      ],
+    });
+  });
+
+  it('rejects an order containing an item missing from the catalog', async () => {
+    repository.findCatalogPrices.mockResolvedValue({
+      foodPrices: new Map(),
+      drinkPrices: new Map(),
+    });
+
+    await expect(
+      service.createOrder({
+        tableNumber: 43,
+        guestsCount: 1,
+        serverId: 7,
+        status: OrderState.RECEIVED,
+        comments: null,
+        discount: 0,
+        discountType: DiscountType.PERCENT,
+        allergies: [],
+        foodItems: [
+          {
+            guestNumber: 1,
+            items: [
+              {
+                itemId: 999,
+                discount: 0,
+                discountType: DiscountType.PERCENT,
+                specialRequest: null,
+                allergies: [],
+              },
+            ],
+          },
+        ],
+        drinkItems: [],
+      })
+    ).rejects.toMatchObject({ statusCode: 400 });
+    expect(repository.create).not.toHaveBeenCalled();
+  });
+
+  it('recalculates the stored total when the discount changes', async () => {
+    repository.findById.mockResolvedValue(responseOrder());
+    repository.update.mockResolvedValue(
+      responseOrder({ discount: 50, totalAmount: 5 })
+    );
+
+    await service.updateOrder(10, { discount: 50 });
+
+    expect(repository.update).toHaveBeenCalledWith(10, {
+      discount: 50,
+      totalAmount: 5,
+    });
+  });
+
+  it('applies AMOUNT order discounts and floors the total at zero', async () => {
+    repository.findById.mockResolvedValue(responseOrder());
+    repository.update.mockResolvedValue(responseOrder());
+
+    await service.updateOrder(10, {
+      discount: 4,
+      discountType: DiscountType.AMOUNT,
+    });
+    expect(repository.update).toHaveBeenLastCalledWith(10, {
+      discount: 4,
+      discountType: DiscountType.AMOUNT,
+      totalAmount: 6,
+    });
+
+    await service.updateOrder(10, {
+      discount: 50,
+      discountType: DiscountType.AMOUNT,
+    });
+    expect(repository.update).toHaveBeenLastCalledWith(10, {
+      discount: 50,
+      discountType: DiscountType.AMOUNT,
+      totalAmount: 0,
+    });
+  });
+
+  it('applies AMOUNT item discounts per unit', async () => {
+    repository.findCatalogPrices.mockResolvedValue({
+      foodPrices: new Map([[100, 8]]),
+      drinkPrices: new Map(),
+    });
+    repository.create.mockResolvedValue(responseOrder());
+
+    await service.createOrder({
+      tableNumber: 43,
+      guestsCount: 1,
+      serverId: 7,
+      status: OrderState.RECEIVED,
+      comments: null,
+      discount: 0,
+      discountType: DiscountType.PERCENT,
+      allergies: [],
+      foodItems: [
+        {
+          guestNumber: 1,
+          items: [
+            {
+              itemId: 100,
+              discount: 3,
+              discountType: DiscountType.AMOUNT,
+              specialRequest: null,
+              allergies: [],
+            },
+          ],
+        },
+      ],
       drinkItems: [],
     });
+
+    expect(repository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        totalAmount: 5,
+        foodItems: [
+          expect.objectContaining({
+            price: 8,
+            finalPrice: 5,
+            discountType: DiscountType.AMOUNT,
+          }),
+        ],
+      })
+    );
+  });
+
+  it('rejects a PERCENT discount above 100 on update', async () => {
+    repository.findById.mockResolvedValue(responseOrder());
+
+    await expect(
+      service.updateOrder(10, { discount: 150 })
+    ).rejects.toMatchObject({ statusCode: 400 });
+    expect(repository.update).not.toHaveBeenCalled();
+  });
+
+  it('validates the merged discount when only the type changes', async () => {
+    repository.findById.mockResolvedValue(
+      responseOrder({ discount: 150, discountType: DiscountType.AMOUNT })
+    );
+
+    await expect(
+      service.updateOrder(10, { discountType: DiscountType.PERCENT })
+    ).rejects.toMatchObject({ statusCode: 400 });
+    expect(repository.update).not.toHaveBeenCalled();
   });
 
   it('updates order properties through the repository', async () => {
@@ -136,7 +313,7 @@ describe('OrdersService', () => {
     expect(repository.update).toHaveBeenCalledWith(10, data);
   });
 
-  it('merges new items and recalculates the discounted total', async () => {
+  it('keeps stored prices and prices only new items from the catalog', async () => {
     const data: OrderUpdateItems = {
       foodItems: [
         {
@@ -144,9 +321,8 @@ describe('OrdersService', () => {
           items: [
             {
               itemId: 101,
-              price: 8,
               discount: 0,
-              finalPrice: 8,
+              discountType: DiscountType.PERCENT,
               specialRequest: 'No salt',
               allergies: [],
             },
@@ -157,10 +333,15 @@ describe('OrdersService', () => {
     };
     const updated = responseOrder({ totalAmount: 16.2 });
     repository.findById.mockResolvedValue(responseOrder());
+    repository.findCatalogPrices.mockResolvedValue({
+      foodPrices: new Map([[101, 8]]),
+      drinkPrices: new Map(),
+    });
     repository.updateItems.mockResolvedValue(updated);
 
     await expect(service.updateOrderItems(10, data)).resolves.toBe(updated);
 
+    expect(repository.findCatalogPrices).toHaveBeenCalledWith([101], []);
     expect(repository.updateItems).toHaveBeenCalledWith(10, {
       totalAmount: 16.2,
       foodItems: [
@@ -168,6 +349,7 @@ describe('OrdersService', () => {
         expect.objectContaining({
           itemId: 101,
           guestNumber: 2,
+          price: 8,
           finalPrice: 8,
           specialRequest: 'No salt',
         }),

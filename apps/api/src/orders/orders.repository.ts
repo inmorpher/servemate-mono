@@ -1,5 +1,6 @@
 import {
   Allergy,
+  DiscountType,
   OrderState,
   PaymentState,
   Prisma,
@@ -14,12 +15,13 @@ import {
   OrderQuery,
   OrderResponseDto,
   OrderSearchResultDto,
-  OrderUpdate,
 } from '@servemate/shared-dto';
 import {
+  CatalogPrices,
   IOrdersRepository,
   OrderCreateData,
   OrderItemsUpdateData,
+  OrderUpdateData,
 } from './orders.repository.interface';
 
 const ORDER_DETAILS_INCLUDE = {
@@ -98,6 +100,7 @@ export class OrdersRepository implements IOrdersRepository {
           comments: true,
           totalAmount: true,
           discount: true,
+          discountType: true,
           tip: true,
         },
         skip: (criteria.page - 1) * criteria.pageSize,
@@ -267,6 +270,7 @@ export class OrdersRepository implements IOrdersRepository {
         status: data.status,
         comments: data.comments ?? null,
         discount: data.discount,
+        discountType: data.discountType,
         totalAmount: data.totalAmount,
 
         foodItems: {
@@ -275,6 +279,7 @@ export class OrdersRepository implements IOrdersRepository {
             itemId: item.itemId,
             price: item.price,
             discount: item.discount,
+            discountType: item.discountType,
             finalPrice: item.finalPrice,
             specialRequest: item.specialRequest,
             allergies: {
@@ -291,6 +296,7 @@ export class OrdersRepository implements IOrdersRepository {
             itemId: item.itemId,
             price: item.price,
             discount: item.discount,
+            discountType: item.discountType,
             finalPrice: item.finalPrice,
             specialRequest: item.specialRequest,
             allergies: {
@@ -306,7 +312,10 @@ export class OrdersRepository implements IOrdersRepository {
 
     return this.toResponse(order);
   }
-  async update(orderId: number, data: OrderUpdate): Promise<OrderResponseDto> {
+  async update(
+    orderId: number,
+    data: OrderUpdateData
+  ): Promise<OrderResponseDto> {
     const order = await this.prisma.order.update({
       where: { id: orderId },
       data: {
@@ -325,12 +334,39 @@ export class OrdersRepository implements IOrdersRepository {
         }),
         ...(data.comments !== undefined && { comments: data.comments }),
         ...(data.discount !== undefined && { discount: data.discount }),
+        ...(data.discountType !== undefined && {
+          discountType: data.discountType,
+        }),
+        ...(data.totalAmount !== undefined && {
+          totalAmount: data.totalAmount,
+        }),
         ...(data.tip !== undefined && { tip: data.tip }),
       },
       include: ORDER_DETAILS_INCLUDE,
     });
 
     return this.toResponse(order);
+  }
+
+  async findCatalogPrices(
+    foodIds: number[],
+    drinkIds: number[]
+  ): Promise<CatalogPrices> {
+    const [foodItems, drinkItems] = await Promise.all([
+      this.prisma.foodItem.findMany({
+        where: { id: { in: foodIds } },
+        select: { id: true, price: true },
+      }),
+      this.prisma.drinkItem.findMany({
+        where: { id: { in: drinkIds } },
+        select: { id: true, price: true },
+      }),
+    ]);
+
+    return {
+      foodPrices: new Map(foodItems.map(item => [item.id, item.price])),
+      drinkPrices: new Map(drinkItems.map(item => [item.id, item.price])),
+    };
   }
 
   async updateItems(
@@ -348,6 +384,7 @@ export class OrdersRepository implements IOrdersRepository {
             itemId: item.itemId,
             price: item.price,
             discount: item.discount,
+            discountType: item.discountType,
             finalPrice: item.finalPrice,
             specialRequest: item.specialRequest,
             printed: item.printed,
@@ -365,6 +402,7 @@ export class OrdersRepository implements IOrdersRepository {
             itemId: item.itemId,
             price: item.price,
             discount: item.discount,
+            discountType: item.discountType,
             finalPrice: item.finalPrice,
             specialRequest: item.specialRequest,
             printed: item.printed,
@@ -665,6 +703,7 @@ export class OrdersRepository implements IOrdersRepository {
       completionTime: order.completionTime,
       totalAmount: order.totalAmount,
       discount: order.discount,
+      discountType: order.discountType,
       tip: order.tip,
       shiftId: order.shiftId,
       allergies: [],
@@ -678,6 +717,7 @@ export class OrdersRepository implements IOrdersRepository {
           guestNumber: item.guestNumber,
           price: item.price,
           discount: item.discount,
+          discountType: item.discountType,
           finalPrice: item.finalPrice,
           printed: item.printed,
           fired: item.fired,
@@ -695,6 +735,7 @@ export class OrdersRepository implements IOrdersRepository {
           guestNumber: item.guestNumber,
           price: item.price,
           discount: item.discount,
+          discountType: item.discountType,
           finalPrice: item.finalPrice,
           printed: item.printed,
           fired: item.fired,
@@ -714,6 +755,7 @@ export class OrdersRepository implements IOrdersRepository {
       guestNumber: number;
       price: number;
       discount: number;
+      discountType: DiscountType;
       finalPrice: number;
       printed: boolean;
       fired: boolean;
