@@ -10,7 +10,7 @@ export const OrderCreateSchema = z
     serverId: z.coerce.number().int().positive(),
     status: z.enum(OrderState).default(OrderState.RECEIVED),
     comments: z.string().nullable().optional(),
-    discount: z.coerce.number().nonnegative().default(0),
+    discount: z.coerce.number().min(0).max(100).default(0),
     allergies: z.array(z.enum(Allergy)).default([]),
     foodItems: z.array(CreateGuestItemsSchema).default([]),
     drinkItems: z.array(CreateGuestItemsSchema).default([]),

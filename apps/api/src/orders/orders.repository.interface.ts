@@ -39,14 +39,24 @@ export interface OrderItemsUpdateData {
   drinkItems: OrderItemCreateData[];
 }
 
+export interface OrderUpdateData extends OrderUpdate {
+  totalAmount?: number;
+}
+
+export interface CatalogPrices {
+  foodPrices: Map<number, number>;
+  drinkPrices: Map<number, number>;
+}
+
 export interface IOrdersRepository {
   findOrders(criteria: OrderQuery): Promise<OrderSearchResultDto>;
   findById(orderId: number): Promise<OrderResponseDto | null>;
   getMeta(criteria: OrderQuery): Promise<OrderMetaDto>;
+  findCatalogPrices(foodIds: number[], drinkIds: number[]): Promise<CatalogPrices>;
 
   create(data: OrderCreateData): Promise<OrderResponseDto>;
 
-  update(orderId: number, data: OrderUpdate): Promise<OrderResponseDto>;
+  update(orderId: number, data: OrderUpdateData): Promise<OrderResponseDto>;
 
   updateItems(
     orderId: number,

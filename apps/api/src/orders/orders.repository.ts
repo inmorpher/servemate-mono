@@ -14,12 +14,13 @@ import {
   OrderQuery,
   OrderResponseDto,
   OrderSearchResultDto,
-  OrderUpdate,
 } from '@servemate/shared-dto';
 import {
+  CatalogPrices,
   IOrdersRepository,
   OrderCreateData,
   OrderItemsUpdateData,
+  OrderUpdateData,
 } from './orders.repository.interface';
 
 const ORDER_DETAILS_INCLUDE = {
@@ -306,7 +307,10 @@ export class OrdersRepository implements IOrdersRepository {
 
     return this.toResponse(order);
   }
-  async update(orderId: number, data: OrderUpdate): Promise<OrderResponseDto> {
+  async update(
+    orderId: number,
+    data: OrderUpdateData
+  ): Promise<OrderResponseDto> {
     const order = await this.prisma.order.update({
       where: { id: orderId },
       data: {
@@ -325,12 +329,36 @@ export class OrdersRepository implements IOrdersRepository {
         }),
         ...(data.comments !== undefined && { comments: data.comments }),
         ...(data.discount !== undefined && { discount: data.discount }),
+        ...(data.totalAmount !== undefined && {
+          totalAmount: data.totalAmount,
+        }),
         ...(data.tip !== undefined && { tip: data.tip }),
       },
       include: ORDER_DETAILS_INCLUDE,
     });
 
     return this.toResponse(order);
+  }
+
+  async findCatalogPrices(
+    foodIds: number[],
+    drinkIds: number[]
+  ): Promise<CatalogPrices> {
+    const [foodItems, drinkItems] = await Promise.all([
+      this.prisma.foodItem.findMany({
+        where: { id: { in: foodIds } },
+        select: { id: true, price: true },
+      }),
+      this.prisma.drinkItem.findMany({
+        where: { id: { in: drinkIds } },
+        select: { id: true, price: true },
+      }),
+    ]);
+
+    return {
+      foodPrices: new Map(foodItems.map(item => [item.id, item.price])),
+      drinkPrices: new Map(drinkItems.map(item => [item.id, item.price])),
+    };
   }
 
   async updateItems(

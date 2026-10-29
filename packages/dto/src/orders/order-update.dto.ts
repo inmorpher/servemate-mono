@@ -8,7 +8,7 @@ export const OrderUpdateSchema = z
     guestsCount: z.coerce.number().int().positive().optional(),
     status: z.enum(OrderState).optional(),
     comments: z.string().nullable().optional(),
-    discount: z.coerce.number().nonnegative().optional(),
+    discount: z.coerce.number().min(0).max(100).optional(),
     tip: z.coerce.number().nonnegative().optional(),
   })
   .refine(data => Object.keys(data).length > 0, {

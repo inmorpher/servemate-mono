@@ -45,11 +45,10 @@ export const OrderItemWithProductSchema = OrderItemSchema.extend({
 });
 
 export type OrderItemWithProduct = z.infer<typeof OrderItemWithProductSchema>;
+// Prices are resolved by the server from the catalog; client-supplied prices are not accepted.
 export const CreateOrderItemSchema = z.object({
   itemId: z.number().int().positive(),
-  price: z.number().nonnegative(),
-  discount: z.number().nonnegative().default(0),
-  finalPrice: z.number().nonnegative().default(0),
+  discount: z.number().min(0).max(100).default(0),
   specialRequest: z.string().nullable().default(null),
   allergies: z.array(z.enum(Allergy)).default([]),
 });
