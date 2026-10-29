@@ -96,6 +96,7 @@ export class PaymentsController extends BaseController {
 
   @Validate(PaymentParamsSchema, 'params')
   @Validate(PaymentCreateSchema, 'body')
+  @Roles([UserRole.ADMIN, UserRole.MANAGER, UserRole.HOST, UserRole.USER])
   @Post('/order/:id')
   async create(
     req: TypedRequest<PaymentParamsDto, {}, PaymentCreateDto>,
