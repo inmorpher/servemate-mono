@@ -100,6 +100,7 @@ export class OrdersController extends BaseController {
   }
 
   @Validate(OrderCreateSchema, 'body')
+  @Roles([UserRole.ADMIN, UserRole.MANAGER, UserRole.HOST, UserRole.USER])
   @Post('/')
   async createOrder(
     req: TypedRequest<{}, {}, OrderCreate>,
@@ -117,6 +118,7 @@ export class OrdersController extends BaseController {
 
   @Validate(OrderUpdateItemsSchema, 'body')
   @Validate(OrderIdSchema, 'params')
+  @Roles([UserRole.ADMIN, UserRole.MANAGER, UserRole.HOST, UserRole.USER])
   @Patch('/:id/items')
   async updateOrderItems(
     req: TypedRequest<OrderIdParams, {}, OrderUpdateItems>,
@@ -135,6 +137,7 @@ export class OrdersController extends BaseController {
 
   @Validate(OrderUpdateSchema, 'body')
   @Validate(OrderIdSchema, 'params')
+  @Roles([UserRole.ADMIN, UserRole.MANAGER, UserRole.HOST, UserRole.USER])
   @Patch('/:id')
   async updateOrder(
     req: TypedRequest<OrderIdParams, {}, OrderUpdate>,
@@ -153,6 +156,7 @@ export class OrdersController extends BaseController {
 
   @Validate(OrderItemIdsSchema, 'body')
   @Validate(OrderIdSchema, 'params')
+  @Roles([UserRole.ADMIN, UserRole.MANAGER, UserRole.HOST, UserRole.USER])
   @Post('/:id/print')
   async printOrderItems(
     req: TypedRequest<OrderIdParams, {}, OrderItemsIds>,
@@ -171,6 +175,7 @@ export class OrdersController extends BaseController {
 
   @Validate(OrderItemIdsSchema, 'body')
   @Validate(OrderIdSchema, 'params')
+  @Roles([UserRole.ADMIN, UserRole.MANAGER, UserRole.HOST, UserRole.USER])
   @Post('/:id/call')
   async callOrderItems(
     req: TypedRequest<OrderIdParams, {}, OrderItemsIds>,
