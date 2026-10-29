@@ -1,4 +1,9 @@
-import { Allergy, OrderState, PaymentState } from '@prisma/client';
+import {
+  Allergy,
+  DiscountType,
+  OrderState,
+  PaymentState,
+} from '@prisma/client';
 import { HTTPError } from '../../errors/http-error.class';
 import { OrdersRepository } from '../../orders/orders.repository';
 import { OrderCreateData } from '../../orders/orders.repository.interface';
@@ -15,6 +20,7 @@ const detailOrder = {
   completionTime: null,
   totalAmount: 18,
   discount: 10,
+  discountType: DiscountType.PERCENT,
   tip: 0,
   shiftId: null,
   server: { id: 7, name: 'Server' },
@@ -25,6 +31,7 @@ const detailOrder = {
       guestNumber: 1,
       price: 20,
       discount: 0,
+      discountType: DiscountType.PERCENT,
       finalPrice: 20,
       printed: false,
       fired: false,
@@ -44,6 +51,7 @@ const createData: OrderCreateData = {
   status: OrderState.RECEIVED,
   comments: null,
   discount: 10,
+  discountType: DiscountType.PERCENT,
   totalAmount: 18,
   foodItems: [
     {
@@ -51,6 +59,7 @@ const createData: OrderCreateData = {
       itemId: 100,
       price: 20,
       discount: 0,
+      discountType: DiscountType.PERCENT,
       finalPrice: 20,
       specialRequest: null,
       allergies: [Allergy.GLUTEN],

@@ -1,4 +1,4 @@
-import { Allergy, OrderState, PaymentState } from '../enums';
+import { Allergy, DiscountType, OrderState, PaymentState } from '../enums';
 import z from 'zod';
 
 const OrderResponseItemSchema = z.object({
@@ -9,6 +9,7 @@ const OrderResponseItemSchema = z.object({
   allergies: z.array(z.enum(Allergy)).default([]),
   price: z.number().nonnegative(),
   discount: z.number().nonnegative(),
+  discountType: z.enum(DiscountType),
   finalPrice: z.number().nonnegative(),
   printed: z.boolean(),
   fired: z.boolean(),
@@ -33,6 +34,7 @@ export const OrderResponseSchema = z.object({
   completionTime: z.date().nullable(),
   totalAmount: z.number().nonnegative(),
   discount: z.number().nonnegative(),
+  discountType: z.enum(DiscountType),
   tip: z.number().nonnegative(),
   shiftId: z.string().nullable(),
   allergies: z.array(z.enum(Allergy)),
@@ -58,6 +60,7 @@ export const OrderListItemSchema = OrderResponseSchema.pick({
   comments: true,
   totalAmount: true,
   discount: true,
+  discountType: true,
   tip: true,
 });
 

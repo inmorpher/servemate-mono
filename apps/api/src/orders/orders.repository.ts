@@ -1,5 +1,6 @@
 import {
   Allergy,
+  DiscountType,
   OrderState,
   PaymentState,
   Prisma,
@@ -99,6 +100,7 @@ export class OrdersRepository implements IOrdersRepository {
           comments: true,
           totalAmount: true,
           discount: true,
+          discountType: true,
           tip: true,
         },
         skip: (criteria.page - 1) * criteria.pageSize,
@@ -268,6 +270,7 @@ export class OrdersRepository implements IOrdersRepository {
         status: data.status,
         comments: data.comments ?? null,
         discount: data.discount,
+        discountType: data.discountType,
         totalAmount: data.totalAmount,
 
         foodItems: {
@@ -276,6 +279,7 @@ export class OrdersRepository implements IOrdersRepository {
             itemId: item.itemId,
             price: item.price,
             discount: item.discount,
+            discountType: item.discountType,
             finalPrice: item.finalPrice,
             specialRequest: item.specialRequest,
             allergies: {
@@ -292,6 +296,7 @@ export class OrdersRepository implements IOrdersRepository {
             itemId: item.itemId,
             price: item.price,
             discount: item.discount,
+            discountType: item.discountType,
             finalPrice: item.finalPrice,
             specialRequest: item.specialRequest,
             allergies: {
@@ -329,6 +334,9 @@ export class OrdersRepository implements IOrdersRepository {
         }),
         ...(data.comments !== undefined && { comments: data.comments }),
         ...(data.discount !== undefined && { discount: data.discount }),
+        ...(data.discountType !== undefined && {
+          discountType: data.discountType,
+        }),
         ...(data.totalAmount !== undefined && {
           totalAmount: data.totalAmount,
         }),
@@ -376,6 +384,7 @@ export class OrdersRepository implements IOrdersRepository {
             itemId: item.itemId,
             price: item.price,
             discount: item.discount,
+            discountType: item.discountType,
             finalPrice: item.finalPrice,
             specialRequest: item.specialRequest,
             printed: item.printed,
@@ -393,6 +402,7 @@ export class OrdersRepository implements IOrdersRepository {
             itemId: item.itemId,
             price: item.price,
             discount: item.discount,
+            discountType: item.discountType,
             finalPrice: item.finalPrice,
             specialRequest: item.specialRequest,
             printed: item.printed,
@@ -693,6 +703,7 @@ export class OrdersRepository implements IOrdersRepository {
       completionTime: order.completionTime,
       totalAmount: order.totalAmount,
       discount: order.discount,
+      discountType: order.discountType,
       tip: order.tip,
       shiftId: order.shiftId,
       allergies: [],
@@ -706,6 +717,7 @@ export class OrdersRepository implements IOrdersRepository {
           guestNumber: item.guestNumber,
           price: item.price,
           discount: item.discount,
+          discountType: item.discountType,
           finalPrice: item.finalPrice,
           printed: item.printed,
           fired: item.fired,
@@ -723,6 +735,7 @@ export class OrdersRepository implements IOrdersRepository {
           guestNumber: item.guestNumber,
           price: item.price,
           discount: item.discount,
+          discountType: item.discountType,
           finalPrice: item.finalPrice,
           printed: item.printed,
           fired: item.fired,
@@ -742,6 +755,7 @@ export class OrdersRepository implements IOrdersRepository {
       guestNumber: number;
       price: number;
       discount: number;
+      discountType: DiscountType;
       finalPrice: number;
       printed: boolean;
       fired: boolean;

@@ -1,11 +1,20 @@
-import { Allergy, PaymentState } from '../enums';
+import { Allergy, DiscountType, PaymentState } from '../enums';
 import z from 'zod';
+
+export const DISCOUNT_RANGE_MESSAGE =
+  'A percent discount must be between 0 and 100';
+
+export const isValidDiscount = (
+  discount: number,
+  discountType: DiscountType
+): boolean => discountType === DiscountType.AMOUNT || discount <= 100;
 
 export const OrderItemSchema = z.object({
   id: z.number().int().positive(),
   itemId: z.number().int().positive(),
   price: z.number().nonnegative(),
   discount: z.number().nonnegative().default(0),
+  discountType: z.enum(DiscountType).default(DiscountType.PERCENT),
   finalPrice: z.number().nonnegative().default(0),
   specialRequest: z.string().nullable().default(null),
   allergies: z.array(z.enum(Allergy)).default([]),
@@ -46,12 +55,18 @@ export const OrderItemWithProductSchema = OrderItemSchema.extend({
 
 export type OrderItemWithProduct = z.infer<typeof OrderItemWithProductSchema>;
 // Prices are resolved by the server from the catalog; client-supplied prices are not accepted.
-export const CreateOrderItemSchema = z.object({
-  itemId: z.number().int().positive(),
-  discount: z.number().min(0).max(100).default(0),
-  specialRequest: z.string().nullable().default(null),
-  allergies: z.array(z.enum(Allergy)).default([]),
-});
+export const CreateOrderItemSchema = z
+  .object({
+    itemId: z.number().int().positive(),
+    discount: z.number().nonnegative().default(0),
+    discountType: z.enum(DiscountType).default(DiscountType.PERCENT),
+    specialRequest: z.string().nullable().default(null),
+    allergies: z.array(z.enum(Allergy)).default([]),
+  })
+  .refine(item => isValidDiscount(item.discount, item.discountType), {
+    message: DISCOUNT_RANGE_MESSAGE,
+    path: ['discount'],
+  });
 
 export const CreateGuestItemsSchema = z.object({
   guestNumber: z.number().int().positive(),

@@ -1,4 +1,4 @@
-import { Allergy, OrderState, PaymentState } from '@prisma/client';
+import { Allergy, DiscountType, OrderState, PaymentState } from '@prisma/client';
 
 import {
   OrderMetaDto,
@@ -13,6 +13,7 @@ export interface OrderItemCreateData {
   itemId: number;
   price: number;
   discount: number;
+  discountType: DiscountType;
   finalPrice: number;
   specialRequest: string | null;
   allergies: Allergy[];
@@ -28,6 +29,7 @@ export interface OrderCreateData {
   status: OrderState;
   comments?: string | null;
   discount: number;
+  discountType: DiscountType;
   totalAmount: number;
   foodItems: OrderItemCreateData[];
   drinkItems: OrderItemCreateData[];

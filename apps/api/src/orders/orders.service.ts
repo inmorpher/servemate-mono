@@ -7,6 +7,9 @@ import { publishRealtimeEvent } from '../websocket/realtime-event';
 import { IWebSocketService } from '../websocket/websocket.service.interface';
 import {
   CreateGuestItems,
+  DISCOUNT_RANGE_MESSAGE,
+  DiscountType,
+  isValidDiscount,
   OrderCreate,
   OrderMetaDto,
   OrderQuery,
@@ -20,13 +23,28 @@ import { IOrdersService } from './orders.service.interface';
 
 const roundMoney = (value: number): number => Number(value.toFixed(2));
 
+// PERCENT discounts are 0-100 of the amount; AMOUNT discounts are a fixed currency value, floored at zero.
+const applyDiscount = (
+  amount: number,
+  discount: number,
+  discountType: DiscountType
+): number => {
+  const discounted =
+    discountType === DiscountType.AMOUNT
+      ? amount - discount
+      : amount * (1 - discount / 100);
+  return roundMoney(Math.max(0, discounted));
+};
+
 const calculateTotal = (
   items: { finalPrice: number }[],
-  discount: number
+  discount: number,
+  discountType: DiscountType
 ): number =>
-  roundMoney(
-    items.reduce((sum, item) => sum + item.finalPrice, 0) *
-      (1 - discount / 100)
+  applyDiscount(
+    roundMoney(items.reduce((sum, item) => sum + item.finalPrice, 0)),
+    discount,
+    discountType
   );
 
 const flattenGuestItems = (guests: CreateGuestItems[]) =>
@@ -59,7 +77,7 @@ export class OrdersService extends BaseService implements IOrdersService {
     return order;
   }
 
-  // Prices come from the catalog, never from the client. The item discount is a percentage.
+  // Prices come from the catalog, never from the client. Item discounts are PERCENT or AMOUNT per unit.
   private async priceNewItems(
     foodGuests: CreateGuestItems[],
     drinkGuests: CreateGuestItems[]
@@ -81,10 +99,13 @@ export class OrdersService extends BaseService implements IOrdersService {
     };
   }
 
-  private priceItem<T extends { itemId: number; discount: number }>(
-    item: T,
-    catalogPrices: Map<number, number>
-  ) {
+  private priceItem<
+    T extends {
+      itemId: number;
+      discount: number;
+      discountType: DiscountType;
+    },
+  >(item: T, catalogPrices: Map<number, number>) {
     const price = catalogPrices.get(item.itemId);
     if (price === undefined) {
       throw new HTTPError(
@@ -97,7 +118,7 @@ export class OrdersService extends BaseService implements IOrdersService {
     return {
       ...item,
       price,
-      finalPrice: roundMoney(price * (1 - item.discount / 100)),
+      finalPrice: applyDiscount(price, item.discount, item.discountType),
     };
   }
 
@@ -132,7 +153,8 @@ export class OrdersService extends BaseService implements IOrdersService {
       );
       const totalAmount = calculateTotal(
         [...foodItems, ...drinkItems],
-        data.discount
+        data.discount,
+        data.discountType
       );
 
       const order = await this.ordersRepository.create({
@@ -142,6 +164,7 @@ export class OrdersService extends BaseService implements IOrdersService {
         status: data.status,
         comments: data.comments,
         discount: data.discount,
+        discountType: data.discountType,
         totalAmount,
         foodItems,
         drinkItems,
@@ -165,14 +188,25 @@ export class OrdersService extends BaseService implements IOrdersService {
   ): Promise<OrderResponseDto> {
     try {
       let totalAmount: number | undefined;
-      if (data.discount !== undefined) {
+      if (data.discount !== undefined || data.discountType !== undefined) {
         const currentOrder = await this.findExistingOrder(orderId);
+        const discount = data.discount ?? currentOrder.discount;
+        const discountType = data.discountType ?? currentOrder.discountType;
+        if (!isValidDiscount(discount, discountType)) {
+          throw new HTTPError(
+            400,
+            this.serviceName,
+            DISCOUNT_RANGE_MESSAGE,
+            `/orders/${orderId}`
+          );
+        }
         totalAmount = calculateTotal(
           [
             ...currentOrder.foodItems.flatMap(guest => guest.items),
             ...currentOrder.drinkItems.flatMap(guest => guest.items),
           ],
-          data.discount
+          discount,
+          discountType
         );
       }
 
@@ -212,7 +246,8 @@ export class OrdersService extends BaseService implements IOrdersService {
 
       const totalAmount = calculateTotal(
         [...foodItems, ...drinkItems],
-        currentOrder.discount
+        currentOrder.discount,
+        currentOrder.discountType
       );
 
       const order = await this.ordersRepository.updateItems(orderId, {

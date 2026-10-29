@@ -62,6 +62,7 @@ describe('Orders DTO schemas', () => {
     expect(parsed.foodItems[0].items[0]).toEqual({
       itemId: 100,
       discount: 0,
+      discountType: 'PERCENT',
       specialRequest: null,
       allergies: [],
     });
@@ -86,6 +87,31 @@ describe('Orders DTO schemas', () => {
 
   it('rejects an empty property update', () => {
     expect(() => OrderUpdateSchema.parse({})).toThrow();
+  });
+
+  it('accepts AMOUNT order discounts above 100 and rejects PERCENT above 100', () => {
+    const base = {
+      tableNumber: 43,
+      guestsCount: 1,
+      serverId: 7,
+      foodItems: [{ guestNumber: 1, items: [{ itemId: 100 }] }],
+      drinkItems: [],
+    };
+
+    expect(
+      OrderCreateSchema.parse({
+        ...base,
+        discount: 150,
+        discountType: 'AMOUNT',
+      }).discount
+    ).toBe(150);
+    expect(() =>
+      OrderCreateSchema.parse({
+        ...base,
+        discount: 150,
+        discountType: 'PERCENT',
+      })
+    ).toThrow();
   });
 
   it('rejects an empty item update', () => {

@@ -1,6 +1,7 @@
 import { Allergy, OrderState, PaymentState } from '@prisma/client';
 import { HTTPError } from '../../errors/http-error.class';
 import {
+  DiscountType,
   OrderCreate,
   OrderResponseDto,
   OrderUpdateItems,
@@ -36,6 +37,7 @@ const responseOrder = (
   completionTime: null,
   totalAmount: 18,
   discount: 10,
+  discountType: DiscountType.PERCENT,
   tip: 0,
   shiftId: null,
   allergies: [],
@@ -51,6 +53,7 @@ const responseOrder = (
           allergies: [Allergy.GLUTEN],
           price: 10,
           discount: 0,
+          discountType: DiscountType.PERCENT,
           finalPrice: 10,
           printed: false,
           fired: false,
@@ -82,6 +85,7 @@ describe('OrdersService', () => {
       status: OrderState.RECEIVED,
       comments: null,
       discount: 10,
+      discountType: DiscountType.PERCENT,
       allergies: [],
       foodItems: [
         {
@@ -90,6 +94,7 @@ describe('OrdersService', () => {
             {
               itemId: 100,
               discount: 0,
+              discountType: DiscountType.PERCENT,
               specialRequest: null,
               allergies: [],
             },
@@ -103,6 +108,7 @@ describe('OrdersService', () => {
             {
               itemId: 200,
               discount: 50,
+              discountType: DiscountType.PERCENT,
               specialRequest: null,
               allergies: [],
             },
@@ -127,12 +133,14 @@ describe('OrdersService', () => {
       status: OrderState.RECEIVED,
       comments: null,
       discount: 10,
+      discountType: DiscountType.PERCENT,
       totalAmount: 21.6,
       foodItems: [
         {
           itemId: 100,
           price: 20,
           discount: 0,
+          discountType: DiscountType.PERCENT,
           finalPrice: 20,
           specialRequest: null,
           allergies: [],
@@ -144,6 +152,7 @@ describe('OrdersService', () => {
           itemId: 200,
           price: 8,
           discount: 50,
+          discountType: DiscountType.PERCENT,
           finalPrice: 4,
           specialRequest: null,
           allergies: [],
@@ -167,6 +176,7 @@ describe('OrdersService', () => {
         status: OrderState.RECEIVED,
         comments: null,
         discount: 0,
+        discountType: DiscountType.PERCENT,
         allergies: [],
         foodItems: [
           {
@@ -175,6 +185,7 @@ describe('OrdersService', () => {
               {
                 itemId: 999,
                 discount: 0,
+                discountType: DiscountType.PERCENT,
                 specialRequest: null,
                 allergies: [],
               },
@@ -201,6 +212,98 @@ describe('OrdersService', () => {
     });
   });
 
+  it('applies AMOUNT order discounts and floors the total at zero', async () => {
+    repository.findById.mockResolvedValue(responseOrder());
+    repository.update.mockResolvedValue(responseOrder());
+
+    await service.updateOrder(10, {
+      discount: 4,
+      discountType: DiscountType.AMOUNT,
+    });
+    expect(repository.update).toHaveBeenLastCalledWith(10, {
+      discount: 4,
+      discountType: DiscountType.AMOUNT,
+      totalAmount: 6,
+    });
+
+    await service.updateOrder(10, {
+      discount: 50,
+      discountType: DiscountType.AMOUNT,
+    });
+    expect(repository.update).toHaveBeenLastCalledWith(10, {
+      discount: 50,
+      discountType: DiscountType.AMOUNT,
+      totalAmount: 0,
+    });
+  });
+
+  it('applies AMOUNT item discounts per unit', async () => {
+    repository.findCatalogPrices.mockResolvedValue({
+      foodPrices: new Map([[100, 8]]),
+      drinkPrices: new Map(),
+    });
+    repository.create.mockResolvedValue(responseOrder());
+
+    await service.createOrder({
+      tableNumber: 43,
+      guestsCount: 1,
+      serverId: 7,
+      status: OrderState.RECEIVED,
+      comments: null,
+      discount: 0,
+      discountType: DiscountType.PERCENT,
+      allergies: [],
+      foodItems: [
+        {
+          guestNumber: 1,
+          items: [
+            {
+              itemId: 100,
+              discount: 3,
+              discountType: DiscountType.AMOUNT,
+              specialRequest: null,
+              allergies: [],
+            },
+          ],
+        },
+      ],
+      drinkItems: [],
+    });
+
+    expect(repository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        totalAmount: 5,
+        foodItems: [
+          expect.objectContaining({
+            price: 8,
+            finalPrice: 5,
+            discountType: DiscountType.AMOUNT,
+          }),
+        ],
+      })
+    );
+  });
+
+  it('rejects a PERCENT discount above 100 on update', async () => {
+    repository.findById.mockResolvedValue(responseOrder());
+
+    await expect(
+      service.updateOrder(10, { discount: 150 })
+    ).rejects.toMatchObject({ statusCode: 400 });
+    expect(repository.update).not.toHaveBeenCalled();
+  });
+
+  it('validates the merged discount when only the type changes', async () => {
+    repository.findById.mockResolvedValue(
+      responseOrder({ discount: 150, discountType: DiscountType.AMOUNT })
+    );
+
+    await expect(
+      service.updateOrder(10, { discountType: DiscountType.PERCENT })
+    ).rejects.toMatchObject({ statusCode: 400 });
+    expect(repository.update).not.toHaveBeenCalled();
+  });
+
   it('updates order properties through the repository', async () => {
     const data = { status: OrderState.SERVED };
     const updated = responseOrder({ status: OrderState.SERVED });
@@ -219,6 +322,7 @@ describe('OrdersService', () => {
             {
               itemId: 101,
               discount: 0,
+              discountType: DiscountType.PERCENT,
               specialRequest: 'No salt',
               allergies: [],
             },
