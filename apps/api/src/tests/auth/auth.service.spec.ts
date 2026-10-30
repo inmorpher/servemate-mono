@@ -26,16 +26,10 @@ const activeUser = {
   isActive: true,
 };
 
-const makeSession = (revoked = false) =>
-  new Session(
-    'session-1',
-    7,
-    'old-jti',
-    future(),
-    null,
-    null,
-    revoked ? new Date() : null
-  );
+const makeSession = (revokedAt: Date | null = null) =>
+  new Session('session-1', 7, 'old-jti', future(), null, null, revokedAt);
+
+const LONG_AGO = () => new Date(Date.now() - 60 * 1000);
 
 const setup = () => {
   const tokenService = {
@@ -89,9 +83,9 @@ describe('AuthService.refresh', () => {
     });
   });
 
-  it('revokes all sessions of the user when a revoked token is reused', async () => {
+  it('revokes all sessions of the user when a token is reused after the grace window', async () => {
     const { service, authRepository, tokenService } = setup();
-    authRepository.findByJti.mockResolvedValue(makeSession(true));
+    authRepository.findByJti.mockResolvedValue(makeSession(LONG_AGO()));
 
     await expect(service.refresh('old-refresh')).rejects.toThrow(
       'Invalid refresh token'
@@ -102,7 +96,19 @@ describe('AuthService.refresh', () => {
     expect(authRepository.save).not.toHaveBeenCalled();
   });
 
-  it('revokes all sessions and rejects when a concurrent refresh wins the race', async () => {
+  it('rejects a token reused within the grace window without ending sessions', async () => {
+    const { service, authRepository } = setup();
+    authRepository.findByJti.mockResolvedValue(makeSession(new Date()));
+
+    await expect(service.refresh('old-refresh')).rejects.toMatchObject({
+      statusCode: 401,
+    });
+
+    expect(authRepository.revokeAllByUser).not.toHaveBeenCalled();
+    expect(authRepository.save).not.toHaveBeenCalled();
+  });
+
+  it('rejects without ending sessions when a concurrent refresh wins the race', async () => {
     const { service, authRepository } = setup();
     authRepository.revokeIfActive.mockResolvedValue(false);
 
@@ -110,7 +116,7 @@ describe('AuthService.refresh', () => {
       'Invalid refresh token'
     );
 
-    expect(authRepository.revokeAllByUser).toHaveBeenCalledWith(7);
+    expect(authRepository.revokeAllByUser).not.toHaveBeenCalled();
     expect(authRepository.save).not.toHaveBeenCalled();
   });
 
