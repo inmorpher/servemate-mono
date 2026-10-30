@@ -140,7 +140,7 @@ describe('WorkspaceService', () => {
     expect(realtimeGateway.publish).toHaveBeenCalledWith(
       expect.objectContaining({
         resource: 'workspace',
-        type: 'workspace.updated',
+        type: 'workspace:updated',
         entityId: 7,
         payload: {
           version: 2,

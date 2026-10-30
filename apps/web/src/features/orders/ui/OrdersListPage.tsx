@@ -10,14 +10,22 @@ import { OrderQuery } from '@servemate/shared-dto';
 import { useGetOrdersAndMeta } from '../hooks/useGetOrdersAndMeta';
 import OrderFilters from './OrderFilters';
 import { OrderList } from './OrderList';
+import { useRealtime } from '@/shared/hooks/useRealtime';
+import { useQueryClient } from '@tanstack/react-query';
 
 export const OrdersListPage = ({ tabId }: { tabId: Tab['id'] }) => {
 	const { filters, handleSortChange, handlePageChange, handlePageSizeChange } =
 		useListPageState<OrderQuery>({ tabId });
 
 	const { orders } = useGetOrdersAndMeta(filters || {});
+	const queryClient = useQueryClient();
 	const { data, error, isError, isLoading, refetch } = orders;
-
+	useRealtime({
+		resource: 'orders',
+		onEvent: () => {
+			queryClient.invalidateQueries({ queryKey: ['orders'] });
+		},
+	});
 	if (isError) {
 		return <ListError error={error?.message} refetch={refetch} isLoading={isLoading} />;
 	}

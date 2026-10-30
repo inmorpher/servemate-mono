@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto';
+import { RealtimeEvent, RealtimeResource } from '@servemate/shared-dto';
 import { IWebSocketService } from './websocket.service.interface';
-import { RealtimeEvent, RealtimeResource } from './websocket.types';
 
 export function publishRealtimeEvent(
   gateway: IWebSocketService | undefined,
@@ -15,7 +15,7 @@ export function publishRealtimeEvent(
 
   const event: RealtimeEvent = {
     id: randomUUID(),
-    type: `${resource}.${type}`,
+    type: `${resource}:${type}`,
     resource,
     entityId,
     payload,

@@ -1,5 +1,5 @@
 import WebSocket from 'ws';
-import { RealtimeEvent, RealtimeResource } from './websocket.types';
+import { RealtimeEvent, RealtimeResource } from '@servemate/shared-dto';
 
 export interface IWebSocketService {
   subscribe(

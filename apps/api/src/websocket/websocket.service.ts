@@ -1,10 +1,10 @@
 import { randomUUID } from 'crypto';
 import { inject, injectable } from 'inversify';
+import { RealtimeEvent, RealtimeResource } from '@servemate/shared-dto';
 import WebSocket from 'ws';
 import { ILogger } from '../logger/logger.service.interface';
 import { TYPES } from '../types';
 import { IWebSocketService } from './websocket.service.interface';
-import { RealtimeEvent, RealtimeResource } from './websocket.types';
 
 type Subscriber = {
   resource: RealtimeResource;
@@ -39,7 +39,7 @@ export class WebSocketService implements IWebSocketService {
     this.subscribers.add({ resource, entityId, userId, ws });
     this.send(ws, {
       id: randomUUID(),
-      type: 'websocket.subscribed',
+      type: 'websocket:subscribed',
       resource,
       entityId,
       payload: { userId },
