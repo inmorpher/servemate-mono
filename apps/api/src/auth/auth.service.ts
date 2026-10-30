@@ -126,9 +126,13 @@ export class AuthService extends BaseService implements IAuthService {
         throw new HTTPError(401, this.serviceName, 'User not found');
       }
 
-      const claimed = await this.authRepository.revokeIfActive(jti, new Date());
+      const claimed = await this.authRepository.rotateIfActive(jti, new Date());
       if (!claimed) {
-        // A concurrent refresh (e.g. another tab) rotated this token moments ago; reject without ending sessions.
+        // Another request rotated this token first. Only end sessions if that was not a rotation.
+        const current = await this.authRepository.findByJti(jti);
+        if (!current || !this.isWithinReuseGrace(current)) {
+          await this.authRepository.revokeAllByUser(session.userId);
+        }
         throw new HTTPError(401, this.serviceName, 'Invalid refresh token');
       }
 
@@ -158,10 +162,10 @@ export class AuthService extends BaseService implements IAuthService {
     }
   }
   private isWithinReuseGrace(session: Session): boolean {
-    const revokedAt = session.revokedAtDate;
+    const rotatedAt = session.rotatedAt;
     return (
-      revokedAt !== null &&
-      Date.now() - revokedAt.getTime() < REFRESH_REUSE_GRACE_MS
+      rotatedAt !== null &&
+      Date.now() - rotatedAt.getTime() < REFRESH_REUSE_GRACE_MS
     );
   }
 

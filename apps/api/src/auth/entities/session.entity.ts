@@ -7,7 +7,8 @@ export class Session {
     public readonly ipAddress: string | null,
     public readonly userAgent: string | null,
     private revokedAt: Date | null = null,
-    public readonly createdAt: Date = new Date()
+    public readonly createdAt: Date = new Date(),
+    public readonly rotatedAt: Date | null = null
   ) {}
 
   isExpired(): boolean {

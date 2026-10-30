@@ -24,6 +24,7 @@ model Session {
   createdAt DateTime @default(now())
   expiresAt DateTime
   revokedAt DateTime?
+  rotatedAt DateTime?
   user      User    @relation(fields: [userId], references: [id])
 
   @@index([userId])

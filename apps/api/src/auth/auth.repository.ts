@@ -40,6 +40,7 @@ export class AuthRepository implements IAuthRepository {
         userAgent: session.userAgent,
         expiresAt: session.expiresAt,
         revokedAt: session.revokedAtDate,
+        rotatedAt: session.rotatedAt,
       },
       create: {
         id: session.id,
@@ -49,15 +50,16 @@ export class AuthRepository implements IAuthRepository {
         userAgent: session.userAgent,
         expiresAt: session.expiresAt,
         revokedAt: session.revokedAtDate,
+        rotatedAt: session.rotatedAt,
         createdAt: session.createdAt,
       },
     });
   }
 
-  async revokeIfActive(jti: string, revokedAt: Date): Promise<boolean> {
+  async rotateIfActive(jti: string, rotatedAt: Date): Promise<boolean> {
     const result = await this.prisma.session.updateMany({
       where: { refreshJti: jti, revokedAt: null },
-      data: { revokedAt },
+      data: { revokedAt: rotatedAt, rotatedAt },
     });
     return result.count === 1;
   }
@@ -78,7 +80,8 @@ export class AuthRepository implements IAuthRepository {
       raw.ipAddress,
       raw.userAgent,
       raw.revokedAt,
-      raw.createdAt
+      raw.createdAt,
+      raw.rotatedAt
     );
   }
 }

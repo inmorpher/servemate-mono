@@ -26,8 +26,8 @@ const activeUser = {
   isActive: true,
 };
 
-const makeSession = (revokedAt: Date | null = null) =>
-  new Session('session-1', 7, 'old-jti', future(), null, null, revokedAt);
+const makeSession = (revokedAt: Date | null = null, rotatedAt: Date | null = null) =>
+  new Session('session-1', 7, 'old-jti', future(), null, null, revokedAt, new Date(), rotatedAt);
 
 const LONG_AGO = () => new Date(Date.now() - 60 * 1000);
 
@@ -49,7 +49,7 @@ const setup = () => {
   };
   const authRepository = {
     findByJti: jest.fn().mockResolvedValue(makeSession()),
-    revokeIfActive: jest.fn().mockResolvedValue(true),
+    rotateIfActive: jest.fn().mockResolvedValue(true),
     revokeAllByUser: jest.fn().mockResolvedValue(undefined),
     save: jest.fn().mockResolvedValue(undefined),
   };
@@ -69,7 +69,7 @@ describe('AuthService.refresh', () => {
 
     const result = await service.refresh('old-refresh');
 
-    expect(authRepository.revokeIfActive).toHaveBeenCalledWith(
+    expect(authRepository.rotateIfActive).toHaveBeenCalledWith(
       'old-jti',
       expect.any(Date)
     );
@@ -83,9 +83,9 @@ describe('AuthService.refresh', () => {
     });
   });
 
-  it('revokes all sessions of the user when a token is reused after the grace window', async () => {
+  it('revokes all sessions when a token is reused after the grace window', async () => {
     const { service, authRepository, tokenService } = setup();
-    authRepository.findByJti.mockResolvedValue(makeSession(LONG_AGO()));
+    authRepository.findByJti.mockResolvedValue(makeSession(LONG_AGO(), LONG_AGO()));
 
     await expect(service.refresh('old-refresh')).rejects.toThrow(
       'Invalid refresh token'
@@ -96,9 +96,9 @@ describe('AuthService.refresh', () => {
     expect(authRepository.save).not.toHaveBeenCalled();
   });
 
-  it('rejects a token reused within the grace window without ending sessions', async () => {
+  it('rejects a rotated token reused within the grace window without ending sessions', async () => {
     const { service, authRepository } = setup();
-    authRepository.findByJti.mockResolvedValue(makeSession(new Date()));
+    authRepository.findByJti.mockResolvedValue(makeSession(new Date(), new Date()));
 
     await expect(service.refresh('old-refresh')).rejects.toMatchObject({
       statusCode: 401,
@@ -108,9 +108,23 @@ describe('AuthService.refresh', () => {
     expect(authRepository.save).not.toHaveBeenCalled();
   });
 
-  it('rejects without ending sessions when a concurrent refresh wins the race', async () => {
+  it('revokes all sessions when a logged-out token is replayed within the grace window', async () => {
     const { service, authRepository } = setup();
-    authRepository.revokeIfActive.mockResolvedValue(false);
+    authRepository.findByJti.mockResolvedValue(makeSession(new Date(), null));
+
+    await expect(service.refresh('old-refresh')).rejects.toThrow(
+      'Invalid refresh token'
+    );
+
+    expect(authRepository.revokeAllByUser).toHaveBeenCalledWith(7);
+  });
+
+  it('rejects without ending sessions when a concurrent rotation wins the race', async () => {
+    const { service, authRepository } = setup();
+    authRepository.rotateIfActive.mockResolvedValue(false);
+    authRepository.findByJti
+      .mockResolvedValueOnce(makeSession())
+      .mockResolvedValueOnce(makeSession(new Date(), new Date()));
 
     await expect(service.refresh('old-refresh')).rejects.toThrow(
       'Invalid refresh token'
@@ -131,7 +145,7 @@ describe('AuthService.refresh', () => {
       'User not found'
     );
 
-    expect(authRepository.revokeIfActive).not.toHaveBeenCalled();
+    expect(authRepository.rotateIfActive).not.toHaveBeenCalled();
     expect(authRepository.save).not.toHaveBeenCalled();
   });
 
