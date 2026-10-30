@@ -1,7 +1,7 @@
 import WebSocket from 'ws';
 import { ILogger } from '../../logger/logger.service.interface';
 import { WebSocketService } from '../../websocket/websocket.service';
-import { RealtimeEvent } from '../../websocket/websocket.types';
+import { RealtimeEvent } from '@servemate/shared-dto';
 
 type MockSocket = {
   readyState: number;
@@ -25,7 +25,7 @@ const socket = (): MockSocket => ({
 
 const event = (overrides: Partial<RealtimeEvent> = {}): RealtimeEvent => ({
   id: 'event-1',
-  type: 'orders.updated',
+  type: 'orders:updated',
   resource: 'orders',
   entityId: 42,
   payload: { status: 'READY' },
@@ -44,7 +44,7 @@ describe('WebSocketService', () => {
     expect(client.send).toHaveBeenCalledTimes(1);
     expect(JSON.parse(client.send.mock.calls[0][0])).toEqual(
       expect.objectContaining({
-        type: 'websocket.subscribed',
+        type: 'websocket:subscribed',
         resource: 'orders',
         entityId: '42',
         payload: { userId: 'user-1' },
@@ -111,7 +111,7 @@ describe('WebSocketService', () => {
     );
     client.send.mockClear();
 
-    service.publish(event({ resource: 'tables', type: 'tables.updated' }));
+    service.publish(event({ resource: 'tables', type: 'tables:updated' }));
 
     expect(client.send).not.toHaveBeenCalled();
   });

@@ -1,12 +1,12 @@
 import { IncomingMessage, Server } from 'http';
 import { inject, injectable } from 'inversify';
 import 'reflect-metadata';
+import { isRealtimeResource, RealtimeResource } from '@servemate/shared-dto';
 import WebSocket from 'ws';
 import { DecodedUser, ITokenService } from '../auth/token.service.interface';
 import { ILogger } from '../logger/logger.service.interface';
 import { TYPES } from '../types';
 import { IWebSocketService } from './websocket.service.interface';
-import { isRealtimeResource, RealtimeResource } from './websocket.types';
 
 export interface IWebSocketGateway {
   initialize(server: Server): void;

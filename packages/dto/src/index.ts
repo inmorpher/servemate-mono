@@ -4,6 +4,7 @@ export * from './drink-items';
 export * from './food-items';
 export * from './orders';
 export * from './payments';
+export * from './realtime';
 export * from './reservations';
 export * from './tables';
 export * from './users';
