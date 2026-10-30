@@ -15,6 +15,8 @@ import { ITokenService } from './token.service.interface';
 import { HTTPError } from '../errors/http-error.class';
 import { Session } from './entities/session.entity';
 
+const REFRESH_REUSE_GRACE_MS = 15_000;
+
 @injectable()
 export class AuthService extends BaseService implements IAuthService {
   protected serviceName = 'AuthService';
@@ -108,8 +110,10 @@ export class AuthService extends BaseService implements IAuthService {
       }
 
       if (session.isRevoked()) {
-        // A revoked refresh token was presented again: treat it as theft and end every session of that user.
-        await this.authRepository.revokeAllByUser(session.userId);
+        if (!this.isWithinReuseGrace(session)) {
+          // Reuse long after rotation: treat as theft and end every session of that user.
+          await this.authRepository.revokeAllByUser(session.userId);
+        }
         throw new HTTPError(401, this.serviceName, 'Invalid refresh token');
       }
 
@@ -124,8 +128,7 @@ export class AuthService extends BaseService implements IAuthService {
 
       const claimed = await this.authRepository.revokeIfActive(jti, new Date());
       if (!claimed) {
-        // Lost a race with a concurrent refresh using the same token.
-        await this.authRepository.revokeAllByUser(session.userId);
+        // A concurrent refresh (e.g. another tab) rotated this token moments ago; reject without ending sessions.
         throw new HTTPError(401, this.serviceName, 'Invalid refresh token');
       }
 
@@ -154,6 +157,14 @@ export class AuthService extends BaseService implements IAuthService {
       throw this.handleError(error);
     }
   }
+  private isWithinReuseGrace(session: Session): boolean {
+    const revokedAt = session.revokedAtDate;
+    return (
+      revokedAt !== null &&
+      Date.now() - revokedAt.getTime() < REFRESH_REUSE_GRACE_MS
+    );
+  }
+
   async me(userId: number): Promise<AuthenticatedUser | null> {
     try {
       const user = await this.usersService.findUserById(userId);
